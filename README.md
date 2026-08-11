@@ -120,7 +120,14 @@ Acesse:
 1. Gere uma `SECRET_KEY` forte:
    `uv run python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"`
 2. Defina `DEBUG=False` e `ALLOWED_HOSTS` com o domínio real.
-3. Informe `DATABASE_URL` apontando para o PostgreSQL.
+3. Informe `DATABASE_URL` apontando para o PostgreSQL. Exemplo:
+
+   ```
+   DATABASE_URL=postgresql://ebd_user:Sabedor1a@localhost:5432/EBD_DADOS
+   ```
+
+   O formato é `postgresql://usuario:senha@host:porta/nome_do_banco` (porta padrão do
+   PostgreSQL: `5432`).
 4. Colete os arquivos estáticos: `uv run python manage.py collectstatic`.
 5. Sirva com WSGI (`ebd.wsgi.application`), por exemplo Gunicorn atrás de um proxy
    reverso (Nginx/Caddy).
