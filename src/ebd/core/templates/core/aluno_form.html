@@ -1,0 +1,3 @@
+{% extends 'core/form.html' %}
+{% block form_titulo %}{% if object %}Editar aluno{% else %}Matricular aluno{% endif %}{% endblock %}
+{% block voltar_url %}{% url 'core:aluno_list' %}{% endblock %}

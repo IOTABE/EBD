@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Relatório Mensal — EBD{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Relatório Mensal</h2>
+    <a href="{% url 'core:dashboard' %}" class="btn btn-outline-secondary">Voltar</a>
+</div>
+
+<form method="get" class="row g-2 align-items-end mb-4">
+    <div class="col-auto">
+        <label for="mes" class="form-label">Mês</label>
+        <select id="mes" name="mes" class="form-select">
+            {% for numero, nome in meses %}
+                <option value="{{ numero }}" {% if numero == mes %}selected{% endif %}>{{ nome }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <label for="ano" class="form-label">Ano</label>
+        <input type="number" id="ano" name="ano" value="{{ ano }}" class="form-control" style="width: 100px;">
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+    </div>
+</form>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-white fw-semibold">
+        Presença nos domingos de {{ nome_mes }}/{{ ano }} — totais por classe
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Classe</th>
+                    <th class="text-center">Matriculados</th>
+                    {% for domingo in domingos %}
+                        <th class="text-center">{{ domingo|date:'d/m' }}</th>
+                    {% endfor %}
+                    <th class="text-center">Total da classe</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for linha in linhas_por_classe %}
+                <tr>
+                    <td>{{ linha.nome }}</td>
+                    <td class="text-center">{{ linha.matriculados }}</td>
+                    {% for valor in linha.valores %}
+                        <td class="text-center">{{ valor }}</td>
+                    {% endfor %}
+                    <td class="text-center fw-semibold">{{ linha.total }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="{{ domingos|length|add:3 }}" class="text-center text-muted py-4">
+                    Nenhum domingo neste mês (ou sem aulas).
+                </td></tr>
+                {% endfor %}
+            </tbody>
+            {% if linhas_por_classe %}
+            <tfoot class="table-light fw-semibold">
+                <tr>
+                    <td>Total do dia</td>
+                    <td class="text-center">{{ total_matriculados }}</td>
+                    {% for total in totais_por_domingo_lista %}
+                        <td class="text-center">{{ total }}</td>
+                    {% endfor %}
+                    <td class="text-center">{{ total_geral }}</td>
+                </tr>
+            </tfoot>
+            {% endif %}
+        </table>
+    </div>
+</div>
+{% endblock %}

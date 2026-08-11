@@ -1,0 +1,3 @@
+{% extends 'core/form.html' %}
+{% block form_titulo %}{% if object %}Editar professor{% else %}Novo professor{% endif %}{% endblock %}
+{% block voltar_url %}{% url 'core:professor_list' %}{% endblock %}

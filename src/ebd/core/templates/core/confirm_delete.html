@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}EBD — Gestão{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-danger">
+            <div class="card-header bg-danger text-white fw-semibold">Confirmar exclusão</div>
+            <div class="card-body">
+                <p>Deseja realmente excluir <strong>{% block objeto_nome %}{{ object }}{% endblock %}</strong>?</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        <a href="{% block voltar_url %}#{% endblock %}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-danger">Sim, excluir</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

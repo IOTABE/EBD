@@ -1,0 +1,21 @@
+[project]
+name = "ebd"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "João Barboasa", email = "iotabe@iotabe.adm.br" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "django>=6.1",
+    "python-decouple>=3.8",
+    "dj-database-url>=2.3",
+]
+
+[project.scripts]
+ebd = "ebd:main"
+
+[build-system]
+requires = ["uv_build>=0.12.1,<0.13.0"]
+build-backend = "uv_build"

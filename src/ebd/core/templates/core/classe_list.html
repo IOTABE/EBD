@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Classes — EBD{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Classes</h2>
+    <a href="{% url 'core:classe_create' %}" class="btn btn-primary">+ Nova classe</a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Nome</th>
+                    <th>Faixa etária</th>
+                    <th>Professor(a)</th>
+                    <th>Alunos ativos</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for classe in classes %}
+                <tr>
+                    <td>{{ classe.nome }}</td>
+                    <td>{{ classe.faixa_etaria }}</td>
+                    <td>{{ classe.professor|default:'—' }}</td>
+                    <td>{{ classe.total_alunos }}</td>
+                    <td class="text-end">
+                        <a href="{% url 'core:classe_update' classe.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
+                        <a href="{% url 'core:classe_delete' classe.pk %}" class="btn btn-sm btn-outline-danger">Excluir</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center text-muted py-4">Nenhuma classe cadastrada.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

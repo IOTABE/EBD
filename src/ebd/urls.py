@@ -1,0 +1,8 @@
+"""URLs raiz do projeto EBD."""
+from django.contrib import admin
+from django.urls import include, path
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('ebd.core.urls')),
+]

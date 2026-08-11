@@ -1,0 +1,3 @@
+{% extends 'core/form.html' %}
+{% block form_titulo %}{% if object %}Editar classe{% else %}Nova classe{% endif %}{% endblock %}
+{% block voltar_url %}{% url 'core:classe_list' %}{% endblock %}

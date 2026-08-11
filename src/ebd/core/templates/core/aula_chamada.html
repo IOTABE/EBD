@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}Chamada — EBD{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Chamada — {{ aula.data|date:'d/m/Y' }}</h2>
+    <a href="{% url 'core:aula_list' %}" class="btn btn-outline-secondary">Voltar</a>
+</div>
+
+<div class="alert alert-info">
+    <strong>{{ aula.classe }}</strong> — {{ aula.licao|default:'Sem lição informada' }}<br>
+    <small>Regra: todos os alunos ativos aparecem marcados como <strong>presentes</strong>; desmarque apenas os ausentes.</small>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="tabela-chamada">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 40px;"></th>
+                        <th>Aluno</th>
+                        <th style="width: 120px;">Presente</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for form in formset %}
+                        <tr class="linha-presenca">
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ form.instance.aluno.nome }}</td>
+                            <td class="text-center">
+                                {{ form.id }}
+                                {{ form.presente }}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4">
+                                Nenhum aluno ativo nesta classe.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+            <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-outline-success" onclick="marcarTodos(true)">Todos presentes</button>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="marcarTodos(false)">Desmarcar todos</button>
+            </div>
+            <button type="submit" class="btn btn-primary">Salvar chamada</button>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function marcarTodos(valor) {
+        document.querySelectorAll('#tabela-chamada input[type="checkbox"]').forEach(function (cb) {
+            cb.checked = valor;
+            atualizarLinha(cb);
+        });
+    }
+
+    document.querySelectorAll('#tabela-chamada input[type="checkbox"]').forEach(function (cb) {
+        cb.addEventListener('change', function () { atualizarLinha(cb); });
+        atualizarLinha(cb);
+    });
+
+    function atualizarLinha(cb) {
+        var linha = cb.closest('tr');
+        if (!linha) return;
+        if (cb.checked) {
+            linha.classList.remove('table-danger');
+        } else {
+            linha.classList.add('table-danger');
+        }
+    }
+</script>
+{% endblock %}
