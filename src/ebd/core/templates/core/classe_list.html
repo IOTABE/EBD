@@ -14,7 +14,7 @@
                 <tr>
                     <th>Nome</th>
                     <th>Faixa etária</th>
-                    <th>Professor(a)</th>
+                    <th>Professores</th>
                     <th>Alunos ativos</th>
                     <th class="text-end">Ações</th>
                 </tr>
@@ -24,7 +24,13 @@
                 <tr>
                     <td>{{ classe.nome }}</td>
                     <td>{{ classe.faixa_etaria }}</td>
-                    <td>{{ classe.professor|default:'—' }}</td>
+                    <td>
+                        {% if classe.professores.all %}
+                            {{ classe.professores.all|join:', ' }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
                     <td>{{ classe.total_alunos }}</td>
                     <td class="text-end">
                         <a href="{% url 'core:classe_update' classe.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>

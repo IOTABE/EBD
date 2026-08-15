@@ -125,7 +125,7 @@ class ClasseListView(ListView):
     template_name = 'core/classe_list.html'
     context_object_name = 'classes'
     # Número de alunos ativos por classe para exibir na listagem.
-    queryset = Classe.objects.annotate(
+    queryset = Classe.objects.prefetch_related('professores').annotate(
         total_alunos=Count('alunos', filter=Q(alunos__status=Aluno.Status.ATIVO))
     )
 
@@ -204,6 +204,65 @@ class AlunoDeleteView(DeleteView):
     def form_valid(self, form):
         messages.success(self.request, 'Aluno removido com sucesso.')
         return super().form_valid(form)
+
+
+import csv
+from django.http import HttpResponse
+from .utils import read_xlsx_rows_from_file, read_csv_rows_from_file, process_alunos_import
+
+
+def aluno_export_view(request):
+    """Exporta a lista completa de alunos para um arquivo CSV."""
+    response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
+    response['Content-Disposition'] = 'attachment; filename="alunos_ebd.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Nome', 'Classe', 'Telefone', 'Data de Nascimento', 'Status'])
+
+    alunos = Aluno.objects.select_related('classe').order_by('nome')
+    for aluno in alunos:
+        nasc = aluno.data_nascimento.strftime('%d/%m/%Y') if aluno.data_nascimento else ''
+        writer.writerow([
+            aluno.nome,
+            aluno.classe.nome if aluno.classe else '',
+            aluno.telefone,
+            nasc,
+            aluno.get_status_display()
+        ])
+
+    return response
+
+
+def aluno_import_view(request):
+    """Permite o upload e importação de alunos via planilha (.xlsx ou .csv)."""
+    if request.method == 'POST':
+        arquivo = request.FILES.get('arquivo')
+        if not arquivo:
+            messages.error(request, 'Por favor, selecione um arquivo para importar.')
+            return redirect('core:aluno_import')
+
+        filename = arquivo.name.lower()
+        try:
+            if filename.endswith('.xlsx'):
+                alunos_data = read_xlsx_rows_from_file(arquivo)
+            elif filename.endswith('.csv'):
+                alunos_data = read_csv_rows_from_file(arquivo)
+            else:
+                messages.error(request, 'Formato inválido. Por favor envie um arquivo .xlsx ou .csv.')
+                return redirect('core:aluno_import')
+
+            criados, atualizados = process_alunos_import(alunos_data)
+            messages.success(
+                request,
+                f'Importação realizada com sucesso! Novos alunos: {criados}, Atualizados: {atualizados}, Total: {len(alunos_data)}'
+            )
+            return redirect('core:aluno_list')
+        except Exception as e:
+            messages.error(request, f'Erro ao processar planilha: {e}')
+            return redirect('core:aluno_import')
+
+    return render(request, 'core/aluno_import.html')
+
 
 
 # =====================================================================
@@ -321,10 +380,15 @@ def relatorio_dominical(request):
     aulas = (
         Aula.objects.filter(data=data)
         .select_related('classe')
+        .prefetch_related('classe__professores')
         .annotate(
-            total=Count('presencas'),
-            presentes=Count('presencas', filter=Q(presencas__presente=True)),
-            ausentes=Count('presencas', filter=Q(presencas__presente=False)),
+            total=Count('presencas', distinct=True),
+            presentes=Count(
+                'presencas', filter=Q(presencas__presente=True), distinct=True
+            ),
+            ausentes=Count(
+                'presencas', filter=Q(presencas__presente=False), distinct=True
+            ),
             matriculados=Count(
                 'classe__alunos',
                 filter=Q(classe__alunos__status=Aluno.Status.ATIVO),

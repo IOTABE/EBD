@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Importar Planilha de Alunos — EBD{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-file-earmark-excel me-2 text-success"></i>Importar Alunos via Planilha</span>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small">
+                    Envie um arquivo no formato <strong>.xlsx</strong> (Excel) ou <strong>.csv</strong> contendo o formulário de respostas de matrículas.
+                    O sistema irá criar automaticamente as turmas e cadastrar/atualizar os alunos.
+                </p>
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label for="arquivo" class="form-label fw-medium">Selecione o arquivo (.xlsx ou .csv):</label>
+                        <input type="file" name="arquivo" id="arquivo" class="form-control" accept=".xlsx, .csv" required>
+                        <div class="form-text">
+                            Suporta planilhas exportadas do Google Forms / Excel (ex.: <em>Respostas ao formulário 1</em>).
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'core:aluno_list' %}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-success">
+                            Importar Planilha
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

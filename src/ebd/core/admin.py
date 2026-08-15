@@ -12,9 +12,13 @@ class ProfessorAdmin(admin.ModelAdmin):
 
 @admin.register(Classe)
 class ClasseAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'faixa_etaria', 'professor')
-    list_filter = ('professor',)
+    list_display = ('nome', 'faixa_etaria', 'lista_professores')
+    filter_horizontal = ('professores',)
     search_fields = ('nome',)
+
+    @admin.display(description='Professores')
+    def lista_professores(self, obj):
+        return ', '.join(p.nome for p in obj.professores.all()) or '—'
 
 
 @admin.register(Aluno)

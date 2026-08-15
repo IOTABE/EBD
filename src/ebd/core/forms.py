@@ -21,13 +21,25 @@ class ProfessorForm(forms.ModelForm):
 class ClasseForm(forms.ModelForm):
     class Meta:
         model = Classe
-        fields = ['nome', 'faixa_etaria', 'professor']
+        fields = ['nome', 'faixa_etaria', 'professores']
         widgets = {
             'nome': forms.TextInput(attrs={'placeholder': 'Ex.: Juniores'}),
             'faixa_etaria': forms.TextInput(
                 attrs={'placeholder': 'Ex.: 9 a 12 anos'}
             ),
+            'professores': forms.SelectMultiple(
+                attrs={'class': 'form-select', 'size': 8}
+            ),
         }
+
+    def clean_professores(self):
+        professores = self.cleaned_data.get('professores')
+        if len(professores) > Classe.MAX_PROFESSORES:
+            raise forms.ValidationError(
+                f'Uma classe pode ter no máximo {Classe.MAX_PROFESSORES} '
+                'professores.'
+            )
+        return professores
 
 
 class AlunoForm(forms.ModelForm):

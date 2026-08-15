@@ -29,17 +29,19 @@ class Professor(models.Model):
 
 
 class Classe(models.Model):
-    """Turma da EBD com faixa etária e professor responsável."""
+    """Turma da EBD com faixa etária e até 4 professores."""
+
+    MAX_PROFESSORES = 4
 
     nome = models.CharField('Nome da classe', max_length=120)
     faixa_etaria = models.CharField(
         'Faixa etária', max_length=100,
         help_text='Ex.: 3 a 5 anos, 13 a 17 anos, Adultos.'
     )
-    professor = models.ForeignKey(
-        Professor, verbose_name='Professor responsável',
-        on_delete=models.SET_NULL, null=True, blank=True,
-        related_name='classes',
+    professores = models.ManyToManyField(
+        Professor, verbose_name='Professores',
+        related_name='classes', blank=True,
+        help_text=f'Selecione até {MAX_PROFESSORES} professores para a classe.',
     )
     criado_em = models.DateTimeField('Criado em', auto_now_add=True)
 
@@ -47,6 +49,18 @@ class Classe(models.Model):
         verbose_name = 'Classe'
         verbose_name_plural = 'Classes'
         ordering = ['nome']
+
+    def clean(self) -> None:
+        """Garante que uma classe tenha no máximo ``MAX_PROFESSORES`` professores."""
+        super().clean()
+        if self.pk and self.professores.count() > self.MAX_PROFESSORES:
+            from django.core.exceptions import ValidationError
+            raise ValidationError({
+                'professores': (
+                    f'Uma classe pode ter no máximo {self.MAX_PROFESSORES} '
+                    'professores.'
+                ),
+            })
 
     def __str__(self) -> str:
         return self.nome

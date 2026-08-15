@@ -24,6 +24,8 @@ urlpatterns = [
     # Alunos
     path('alunos/', views.AlunoListView.as_view(), name='aluno_list'),
     path('alunos/novo/', views.AlunoCreateView.as_view(), name='aluno_create'),
+    path('alunos/importar/', views.aluno_import_view, name='aluno_import'),
+    path('alunos/exportar/', views.aluno_export_view, name='aluno_export'),
     path('alunos/<int:pk>/editar/', views.AlunoUpdateView.as_view(), name='aluno_update'),
     path('alunos/<int:pk>/excluir/', views.AlunoDeleteView.as_view(), name='aluno_delete'),
 

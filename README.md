@@ -9,7 +9,7 @@ dominical e mensal, e dashboard com gráficos.
 - **Dashboard** — gráficos de evolução mensal (presentes/ausentes), assiduidade por
   classe (Chart.js) e totais gerais.
 - **Professores** — cadastro, edição, exclusão e listagem.
-- **Classes** — turmas com faixa etária e professor responsável; exibe o total de
+- **Classes** — turmas com faixa etária e **até 4 professores**; exibe o total de
   alunos ativos por classe.
 - **Alunos** — cadastro com status **Ativo/Inativo**; alunos inativos **não entram** na
   chamada do dia.
@@ -34,7 +34,8 @@ dominical e mensal, e dashboard com gráficos.
 ## Modelo de dados
 
 - **Professor** — nome, e-mail, telefone, data de nascimento.
-- **Classe** — nome, faixa etária, professor responsável (`SET_NULL`).
+- **Classe** — nome, faixa etária, professores (`ManyToMany`, no máximo 4 por
+  classe).
 - **Aluno** — nome, data de nascimento, telefone, status (`ativo`/`inativo`), classe
   (`PROTECT`).
 - **Aula** — data, classe, lição/tema, observações. Restrição:
