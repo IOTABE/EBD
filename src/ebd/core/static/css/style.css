@@ -1,0 +1,26 @@
+body {
+    min-width: 320px;
+}
+
+@media (max-width: 575.98px) {
+    h2 {
+        font-size: 1.4rem;
+    }
+
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+
+    .table-responsive .btn-sm {
+        padding: 0.25rem 0.4rem;
+        font-size: 0.75rem;
+    }
+}
+
+@media print {
+    .navbar,
+    .btn,
+    form[method="get"] {
+        display: none;
+    }
+}

@@ -2,7 +2,7 @@
 {% block title %}Chamada — EBD{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
     <h2 class="mb-0">Chamada — {{ aula.data|date:'d/m/Y' }}</h2>
     <a href="{% url 'core:aula_list' %}" class="btn btn-outline-secondary">Voltar</a>
 </div>
@@ -45,8 +45,8 @@
                 </tbody>
             </table>
         </div>
-        <div class="card-footer bg-white d-flex justify-content-between align-items-center">
-            <div class="btn-group">
+        <div class="card-footer bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div class="btn-group" role="group" aria-label="Marcar presença">
                 <button type="button" class="btn btn-sm btn-outline-success" onclick="marcarTodos(true)">Todos presentes</button>
                 <button type="button" class="btn btn-sm btn-outline-danger" onclick="marcarTodos(false)">Desmarcar todos</button>
             </div>

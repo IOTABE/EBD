@@ -2,17 +2,17 @@
 {% block title %}Professores — EBD{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
     <h2 class="mb-0">Professores</h2>
     <a href="{% url 'core:professor_create' %}" class="btn btn-primary">+ Novo professor</a>
 </div>
 
 <form method="get" class="row g-2 mb-3">
-    <div class="col">
+    <div class="col-12 col-sm">
         <input type="text" name="q" value="{{ q }}" class="form-control"
                placeholder="Buscar professor por nome ou e-mail...">
     </div>
-    <div class="col-auto">
+    <div class="col-12 col-sm-auto">
         <button type="submit" class="btn btn-primary">Buscar</button>
         {% if q %}
             <a href="{% url 'core:professor_list' %}" class="btn btn-outline-secondary">Limpar</a>

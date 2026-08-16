@@ -10,7 +10,7 @@
                 <p>Deseja realmente excluir <strong>{% block objeto_nome %}{{ object }}{% endblock %}</strong>?</p>
                 <form method="post">
                     {% csrf_token %}
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex flex-wrap justify-content-between gap-2">
                         <a href="{% block voltar_url %}#{% endblock %}" class="btn btn-outline-secondary">Cancelar</a>
                         <button type="submit" class="btn btn-danger">Sim, excluir</button>
                     </div>
