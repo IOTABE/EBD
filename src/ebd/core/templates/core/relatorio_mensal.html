@@ -67,6 +67,14 @@
                     {% endfor %}
                     <td class="text-center">{{ total_geral }}</td>
                 </tr>
+                <tr>
+                    <td>% Presentes / Matriculados</td>
+                    <td></td>
+                    {% for percentual in percentuais_por_domingo %}
+                        <td class="text-center">{{ percentual }}%</td>
+                    {% endfor %}
+                    <td></td>
+                </tr>
             </tfoot>
             {% endif %}
         </table>

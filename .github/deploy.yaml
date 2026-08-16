@@ -1,6 +1,6 @@
 name: Deploy para Servidor de Produção
 
-on:
+on: 
   push:
     branches:
       - main  # Executa o deploy sempre que houver um push na branch main

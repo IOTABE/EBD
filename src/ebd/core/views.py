@@ -405,6 +405,11 @@ def relatorio_dominical(request):
     )
     # Total de matriculados (ativos) das classes com aula no dia.
     consolidado['matriculados'] = sum(aula.matriculados for aula in aulas)
+    # Percentual de presentes em relação ao total de matriculados.
+    consolidado['percentual'] = (
+        round(consolidado['presentes'] / consolidado['matriculados'] * 100, 1)
+        if consolidado['matriculados'] else 0
+    )
 
     context = {
         'data': data,
@@ -486,6 +491,11 @@ def relatorio_mensal(request):
         for c in classes
     ]
     totais_por_domingo_lista = [totais_por_domingo[d] for d in domingos]
+    # Percentual de presentes por domingo em relação ao total de matriculados.
+    percentuais_por_domingo = [
+        round(t / total_matriculados * 100, 1) if total_matriculados else 0
+        for t in totais_por_domingo_lista
+    ]
 
     context = {
         'ano': ano,
@@ -495,6 +505,7 @@ def relatorio_mensal(request):
         'domingos': domingos,
         'linhas_por_classe': linhas_por_classe,
         'totais_por_domingo_lista': totais_por_domingo_lista,
+        'percentuais_por_domingo': percentuais_por_domingo,
         'total_geral': total_geral,
         'total_matriculados': total_matriculados,
     }
