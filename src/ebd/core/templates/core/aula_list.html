@@ -7,6 +7,19 @@
     <a href="{% url 'core:aula_create' %}" class="btn btn-primary">+ Nova aula</a>
 </div>
 
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input type="date" name="data" value="{{ data_atual }}" class="form-control"
+               placeholder="Filtrar por data...">
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+        {% if data_atual %}
+            <a href="{% url 'core:aula_list' %}" class="btn btn-outline-secondary">Limpar</a>
+        {% endif %}
+    </div>
+</form>
+
 <div class="card shadow-sm">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">

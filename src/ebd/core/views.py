@@ -345,7 +345,18 @@ class AulaListView(ListView):
     model = Aula
     template_name = 'core/aula_list.html'
     context_object_name = 'aulas'
-    queryset = Aula.objects.select_related('classe').prefetch_related('presencas')
+
+    def get_queryset(self):
+        qs = Aula.objects.select_related('classe').prefetch_related('presencas')
+        data = self.request.GET.get('data', '').strip()
+        if data:
+            qs = qs.filter(data=data)
+        return qs.order_by('-data')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['data_atual'] = self.request.GET.get('data', '').strip()
+        return context
 
 
 class AulaCreateView(CreateView):
