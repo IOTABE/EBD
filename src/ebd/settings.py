@@ -100,4 +100,28 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# ------------------------------------------------------------ HTTPS (produção)
+# Aplicável apenas com DEBUG=False (servidor por trás de proxy reverso que
+# encerra o TLS, ex.: Nginx/Caddy). Em desenvolvimento mantém HTTP simples.
+if not DEBUG:
+    # Confia no cabeçalho X-Forwarded-Proto enviado pelo proxy reverso.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+    # Redireciona todo o tráfego HTTP para HTTPS.
+    SECURE_SSL_REDIRECT = True
+
+    # Cookies somente via HTTPS.
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+    # HSTS (HTTP Strict Transport Security) — forçar HTTPS no navegador.
+    SECURE_HSTS_SECONDS = 31536000  # 1 ano
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+    # Headers de segurança adicionais.
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = 'same-origin'
+    X_FRAME_OPTIONS = 'DENY'
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
