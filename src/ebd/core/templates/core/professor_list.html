@@ -7,6 +7,19 @@
     <a href="{% url 'core:professor_create' %}" class="btn btn-primary">+ Novo professor</a>
 </div>
 
+<form method="get" class="row g-2 mb-3">
+    <div class="col">
+        <input type="text" name="q" value="{{ q }}" class="form-control"
+               placeholder="Buscar professor por nome ou e-mail...">
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Buscar</button>
+        {% if q %}
+            <a href="{% url 'core:professor_list' %}" class="btn btn-outline-secondary">Limpar</a>
+        {% endif %}
+    </div>
+</form>
+
 <div class="card shadow-sm">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
@@ -32,10 +45,13 @@
                     </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="5" class="text-center text-muted py-4">Nenhum professor cadastrado.</td></tr>
+                <tr><td colspan="5" class="text-center text-muted py-4">Nenhum professor encontrado.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    {% if is_paginated %}
+        {% include 'core/_paginacao.html' %}
+    {% endif %}
 </div>
 {% endblock %}

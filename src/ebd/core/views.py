@@ -23,6 +23,49 @@ from .forms import AulaForm, AlunoForm, ClasseForm, PresencaForm, ProfessorForm
 from .models import Aula, Aluno, Classe, Presenca, Professor
 
 # =====================================================================
+# PAGINAÇÃO REUTILIZÁVEL
+# =====================================================================
+
+
+def _opcoes_por_pagina(total):
+    """Opções de registros por página: de 10 em 10 até o total encontrado."""
+    if total <= 0:
+        return [10]
+    opcoes = list(range(10, total + 1, 10))
+    if not opcoes or opcoes[-1] < total:
+        opcoes.append(total)
+    return opcoes
+
+
+def _por_pagina_selecionada(request, total):
+    """Valida o valor do parâmetro ``por_pagina`` contra as opções disponíveis."""
+    opcoes = _opcoes_por_pagina(total)
+    try:
+        valor = int(request.GET.get('por_pagina', opcoes[0]))
+    except (TypeError, ValueError):
+        return opcoes[0]
+    return valor if valor in opcoes else opcoes[0]
+
+
+class PaginacaoMixin:
+    """ListView com paginação (padrão 10) e seletor de itens por página."""
+
+    def get_paginate_by(self, queryset):
+        return _por_pagina_selecionada(self.request, queryset.count())
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        paginator = context.get('paginator')
+        total = paginator.count if paginator else 0
+        context['por_pagina'] = _por_pagina_selecionada(self.request, total)
+        context['opcoes_por_pagina'] = _opcoes_por_pagina(total)
+        params = self.request.GET.copy()
+        params.pop('page', None)
+        context['params'] = params.urlencode()
+        return context
+
+
+# =====================================================================
 # DASHBOARD
 # =====================================================================
 
@@ -77,10 +120,22 @@ def dashboard(request):
 # =====================================================================
 
 
-class ProfessorListView(ListView):
+class ProfessorListView(PaginacaoMixin, ListView):
     model = Professor
     template_name = 'core/professor_list.html'
     context_object_name = 'professores'
+
+    def get_queryset(self):
+        qs = Professor.objects.all()
+        q = self.request.GET.get('q', '').strip()
+        if q:
+            qs = qs.filter(Q(nome__icontains=q) | Q(email__icontains=q))
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['q'] = self.request.GET.get('q', '').strip()
+        return context
 
 
 class ProfessorCreateView(CreateView):
@@ -120,12 +175,12 @@ class ProfessorDeleteView(DeleteView):
 # =====================================================================
 
 
-class ClasseListView(ListView):
+class ClasseListView(PaginacaoMixin, ListView):
     model = Classe
     template_name = 'core/classe_list.html'
     context_object_name = 'classes'
     # Número de alunos ativos por classe para exibir na listagem.
-    queryset = Classe.objects.prefetch_related('professores').annotate(
+    queryset = Classe.objects.prefetch_related('professores').order_by('nome').annotate(
         total_alunos=Count('alunos', filter=Q(alunos__status=Aluno.Status.ATIVO))
     )
 
@@ -167,11 +222,27 @@ class ClasseDeleteView(DeleteView):
 # =====================================================================
 
 
-class AlunoListView(ListView):
+class AlunoListView(PaginacaoMixin, ListView):
     model = Aluno
     template_name = 'core/aluno_list.html'
     context_object_name = 'alunos'
-    queryset = Aluno.objects.select_related('classe')
+
+    def get_queryset(self):
+        qs = Aluno.objects.select_related('classe')
+        q = self.request.GET.get('q', '').strip()
+        classe_id = self.request.GET.get('classe', '').strip()
+        if q:
+            qs = qs.filter(nome__icontains=q)
+        if classe_id:
+            qs = qs.filter(classe_id=classe_id)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['q'] = self.request.GET.get('q', '').strip()
+        context['classe_atual'] = self.request.GET.get('classe', '').strip()
+        context['lista_classes'] = Classe.objects.order_by('nome')
+        return context
 
 
 class AlunoCreateView(CreateView):

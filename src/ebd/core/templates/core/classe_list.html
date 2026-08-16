@@ -43,5 +43,8 @@
             </tbody>
         </table>
     </div>
+    {% if is_paginated %}
+        {% include 'core/_paginacao.html' %}
+    {% endif %}
 </div>
 {% endblock %}
