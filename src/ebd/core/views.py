@@ -612,3 +612,78 @@ def relatorio_mensal(request):
         'total_matriculados': total_matriculados,
     }
     return render(request, 'core/relatorio_mensal.html', context)
+
+
+# =====================================================================
+# RANKING DE FREQUÊNCIA
+# =====================================================================
+
+
+def relatorio_ranking(request):
+    """Ranking geral e por classe do percentual de frequência.
+
+    Período apurado: do início do ano (1º de janeiro) até a data do
+    relatório. A frequência de cada aluno é calculada como o percentual
+    de chamadas em que esteve presente em relação ao total de chamadas
+    registradas para ele no período.
+    """
+    hoje = date.today()
+    try:
+        ano = int(request.GET.get('ano', hoje.year))
+    except ValueError:
+        ano = hoje.year
+
+    inicio = date(ano, 1, 1)
+    # No ano corrente o período termina hoje; em anos passados, em 31/12.
+    fim = min(hoje, date(ano, 12, 31))
+
+    presencas = (
+        Presenca.objects.filter(aula__data__range=[inicio, fim])
+        .values('aluno_id', 'aluno__nome', 'aluno__classe_id', 'aluno__classe__nome')
+        .annotate(
+            total=Count('id'),
+            presentes=Count('id', filter=Q(presente=True)),
+        )
+    )
+
+    ranking = []
+    for p in presencas:
+        total = p['total']
+        presentes = p['presentes']
+        ranking.append(
+            {
+                'aluno_id': p['aluno_id'],
+                'nome': p['aluno__nome'],
+                'classe_id': p['aluno__classe_id'],
+                'classe': p['aluno__classe__nome'],
+                'total': total,
+                'presentes': presentes,
+                'ausentes': total - presentes,
+                'percentual': round(presentes / total * 100, 1) if total else 0,
+            }
+        )
+
+    # Ranking geral: maior frequência primeiro; desempate por nome.
+    ranking.sort(key=lambda item: (-item['percentual'], item['nome'].lower()))
+    for posicao, item in enumerate(ranking, start=1):
+        item['posicao'] = posicao
+
+    # Ranking por classe: agrupa os mesmos itens, ordenados por frequência.
+    por_classe = {}
+    for item in ranking:
+        por_classe.setdefault(item['classe'], []).append(item)
+    ranking_por_classe = []
+    for nome_classe in sorted(por_classe):
+        alunos = por_classe[nome_classe]
+        for posicao, item in enumerate(alunos, start=1):
+            item['posicao_classe'] = posicao
+        ranking_por_classe.append({'classe': nome_classe, 'alunos': alunos})
+
+    context = {
+        'ano': ano,
+        'inicio': inicio,
+        'fim': fim,
+        'ranking_geral': ranking,
+        'ranking_por_classe': ranking_por_classe,
+    }
+    return render(request, 'core/relatorio_ranking.html', context)
