@@ -12,9 +12,19 @@
         <input type="date" name="data" value="{{ data_atual }}" class="form-control"
                placeholder="Filtrar por data...">
     </div>
+    <div class="col-md-4">
+        <select name="classe" class="form-select">
+            <option value="">Todas as classes</option>
+            {% for classe in lista_classes %}
+                <option value="{{ classe.pk }}" {% if classe_atual == classe.pk|stringformat:'s' %}selected{% endif %}>
+                    {{ classe.nome }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
     <div class="col-auto">
         <button type="submit" class="btn btn-primary">Filtrar</button>
-        {% if data_atual %}
+        {% if data_atual or classe_atual %}
             <a href="{% url 'core:aula_list' %}" class="btn btn-outline-secondary">Limpar</a>
         {% endif %}
     </div>
@@ -57,5 +67,8 @@
             </tbody>
         </table>
     </div>
+    {% if is_paginated %}
+        {% include 'core/_paginacao.html' %}
+    {% endif %}
 </div>
 {% endblock %}

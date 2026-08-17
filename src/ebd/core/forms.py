@@ -1,7 +1,24 @@
 """Formulários do sistema de gestão da EBD."""
 from django import forms
+from django.contrib.auth.forms import AuthenticationForm
 
 from .models import Aula, Aluno, Classe, Presenca, Professor
+
+
+class LoginForm(AuthenticationForm):
+    """Login com estilo Bootstrap (usado na tela de acesso restrito)."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].widget.attrs.update({
+            'class': 'form-control',
+            'autofocus': True,
+            'placeholder': 'Usuário',
+        })
+        self.fields['password'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Senha',
+        })
 
 
 class ProfessorForm(forms.ModelForm):

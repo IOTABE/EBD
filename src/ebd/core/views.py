@@ -11,6 +11,8 @@ import json
 from datetime import date
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Q
 from django.db.models.functions import TruncMonth
 from django.forms import inlineformset_factory
@@ -27,19 +29,19 @@ from .models import Aula, Aluno, Classe, Presenca, Professor
 # =====================================================================
 
 
-def _opcoes_por_pagina(total):
-    """Opções de registros por página: de 10 em 10 até o total encontrado."""
+def _opcoes_por_pagina(total, base=10):
+    """Opções de registros por página: de ``base`` em ``base`` até o total."""
     if total <= 0:
-        return [10]
-    opcoes = list(range(10, total + 1, 10))
+        return [base]
+    opcoes = list(range(base, total + 1, base))
     if not opcoes or opcoes[-1] < total:
         opcoes.append(total)
     return opcoes
 
 
-def _por_pagina_selecionada(request, total):
+def _por_pagina_selecionada(request, total, base=10):
     """Valida o valor do parâmetro ``por_pagina`` contra as opções disponíveis."""
-    opcoes = _opcoes_por_pagina(total)
+    opcoes = _opcoes_por_pagina(total, base)
     try:
         valor = int(request.GET.get('por_pagina', opcoes[0]))
     except (TypeError, ValueError):
@@ -48,17 +50,27 @@ def _por_pagina_selecionada(request, total):
 
 
 class PaginacaoMixin:
-    """ListView com paginação (padrão 10) e seletor de itens por página."""
+    """ListView com paginação e seletor de itens por página.
+
+    ``paginate_base`` define o tamanho inicial de cada página
+    (padrão 10); pode ser sobrescrito nas views que usam o mixin.
+    """
+
+    paginate_base = 10
 
     def get_paginate_by(self, queryset):
-        return _por_pagina_selecionada(self.request, queryset.count())
+        return _por_pagina_selecionada(
+            self.request, queryset.count(), self.paginate_base
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         paginator = context.get('paginator')
         total = paginator.count if paginator else 0
-        context['por_pagina'] = _por_pagina_selecionada(self.request, total)
-        context['opcoes_por_pagina'] = _opcoes_por_pagina(total)
+        context['por_pagina'] = _por_pagina_selecionada(
+            self.request, total, self.paginate_base
+        )
+        context['opcoes_por_pagina'] = _opcoes_por_pagina(total, self.paginate_base)
         params = self.request.GET.copy()
         params.pop('page', None)
         context['params'] = params.urlencode()
@@ -120,7 +132,7 @@ def dashboard(request):
 # =====================================================================
 
 
-class ProfessorListView(PaginacaoMixin, ListView):
+class ProfessorListView(LoginRequiredMixin, PaginacaoMixin, ListView):
     model = Professor
     template_name = 'core/professor_list.html'
     context_object_name = 'professores'
@@ -138,7 +150,7 @@ class ProfessorListView(PaginacaoMixin, ListView):
         return context
 
 
-class ProfessorCreateView(CreateView):
+class ProfessorCreateView(LoginRequiredMixin, CreateView):
     model = Professor
     form_class = ProfessorForm
     template_name = 'core/professor_form.html'
@@ -149,7 +161,7 @@ class ProfessorCreateView(CreateView):
         return super().form_valid(form)
 
 
-class ProfessorUpdateView(UpdateView):
+class ProfessorUpdateView(LoginRequiredMixin, UpdateView):
     model = Professor
     form_class = ProfessorForm
     template_name = 'core/professor_form.html'
@@ -160,7 +172,7 @@ class ProfessorUpdateView(UpdateView):
         return super().form_valid(form)
 
 
-class ProfessorDeleteView(DeleteView):
+class ProfessorDeleteView(LoginRequiredMixin, DeleteView):
     model = Professor
     template_name = 'core/professor_confirm_delete.html'
     success_url = reverse_lazy('core:professor_list')
@@ -175,7 +187,7 @@ class ProfessorDeleteView(DeleteView):
 # =====================================================================
 
 
-class ClasseListView(PaginacaoMixin, ListView):
+class ClasseListView(LoginRequiredMixin, PaginacaoMixin, ListView):
     model = Classe
     template_name = 'core/classe_list.html'
     context_object_name = 'classes'
@@ -185,7 +197,7 @@ class ClasseListView(PaginacaoMixin, ListView):
     )
 
 
-class ClasseCreateView(CreateView):
+class ClasseCreateView(LoginRequiredMixin, CreateView):
     model = Classe
     form_class = ClasseForm
     template_name = 'core/classe_form.html'
@@ -196,7 +208,7 @@ class ClasseCreateView(CreateView):
         return super().form_valid(form)
 
 
-class ClasseUpdateView(UpdateView):
+class ClasseUpdateView(LoginRequiredMixin, UpdateView):
     model = Classe
     form_class = ClasseForm
     template_name = 'core/classe_form.html'
@@ -207,7 +219,7 @@ class ClasseUpdateView(UpdateView):
         return super().form_valid(form)
 
 
-class ClasseDeleteView(DeleteView):
+class ClasseDeleteView(LoginRequiredMixin, DeleteView):
     model = Classe
     template_name = 'core/classe_confirm_delete.html'
     success_url = reverse_lazy('core:classe_list')
@@ -222,7 +234,7 @@ class ClasseDeleteView(DeleteView):
 # =====================================================================
 
 
-class AlunoListView(PaginacaoMixin, ListView):
+class AlunoListView(LoginRequiredMixin, PaginacaoMixin, ListView):
     model = Aluno
     template_name = 'core/aluno_list.html'
     context_object_name = 'alunos'
@@ -245,7 +257,7 @@ class AlunoListView(PaginacaoMixin, ListView):
         return context
 
 
-class AlunoCreateView(CreateView):
+class AlunoCreateView(LoginRequiredMixin, CreateView):
     model = Aluno
     form_class = AlunoForm
     template_name = 'core/aluno_form.html'
@@ -256,7 +268,7 @@ class AlunoCreateView(CreateView):
         return super().form_valid(form)
 
 
-class AlunoUpdateView(UpdateView):
+class AlunoUpdateView(LoginRequiredMixin, UpdateView):
     model = Aluno
     form_class = AlunoForm
     template_name = 'core/aluno_form.html'
@@ -267,7 +279,7 @@ class AlunoUpdateView(UpdateView):
         return super().form_valid(form)
 
 
-class AlunoDeleteView(DeleteView):
+class AlunoDeleteView(LoginRequiredMixin, DeleteView):
     model = Aluno
     template_name = 'core/aluno_confirm_delete.html'
     success_url = reverse_lazy('core:aluno_list')
@@ -282,6 +294,7 @@ from django.http import HttpResponse
 from .utils import read_xlsx_rows_from_file, read_csv_rows_from_file, process_alunos_import
 
 
+@login_required
 def aluno_export_view(request):
     """Exporta a lista completa de alunos para um arquivo CSV."""
     response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
@@ -304,6 +317,7 @@ def aluno_export_view(request):
     return response
 
 
+@login_required
 def aluno_import_view(request):
     """Permite o upload e importação de alunos via planilha (.xlsx ou .csv)."""
     if request.method == 'POST':
@@ -341,21 +355,27 @@ def aluno_import_view(request):
 # =====================================================================
 
 
-class AulaListView(ListView):
+class AulaListView(PaginacaoMixin, ListView):
     model = Aula
     template_name = 'core/aula_list.html'
     context_object_name = 'aulas'
+    paginate_base = 6
 
     def get_queryset(self):
         qs = Aula.objects.select_related('classe').prefetch_related('presencas')
         data = self.request.GET.get('data', '').strip()
+        classe_id = self.request.GET.get('classe', '').strip()
         if data:
             qs = qs.filter(data=data)
+        if classe_id:
+            qs = qs.filter(classe_id=classe_id)
         return qs.order_by('-data')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['data_atual'] = self.request.GET.get('data', '').strip()
+        context['classe_atual'] = self.request.GET.get('classe', '').strip()
+        context['lista_classes'] = Classe.objects.order_by('nome')
         return context
 
 
