@@ -1,9 +1,9 @@
 name: Deploy para Servidor de Produção
 
-on: 
+on:
   push:
     branches:
-      - master  # Executa o deploy sempre que houver um push na branch master
+      - master # Executa o deploy sempre que houver um push na branch master
 
 jobs:
   deploy:
@@ -17,7 +17,7 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          script: 
+          script: |
             # 1. Navegar até o diretório do projeto
             cd /www/wwwroot/ibnj.top
 
@@ -32,6 +32,5 @@ jobs:
             python manage.py migrate --noinput
             python manage.py collectstatic --noinput
 
-            # 5. Reiniciar o Gunicorn e Nginx para aplicar as alterações
-            # Exemplo via Supervisor/Systemd ou sinal do Gunicorn:
-            pkill -HUP -f gunicorn || systemctl restart nginx
+            # 5. Reiniciar o Gunicorn para aplicar as alterações
+            pkill -HUP -f gunicorn
