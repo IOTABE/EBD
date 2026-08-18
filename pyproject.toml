@@ -12,6 +12,7 @@ dependencies = [
     "python-decouple>=3.8",
     "dj-database-url>=2.3",
     "gunicorn>=26.0.0",
+    "whitenoise>=6.12.0",
 ]
 
 [project.scripts]
