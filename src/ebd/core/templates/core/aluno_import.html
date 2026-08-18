@@ -31,6 +31,38 @@
                         </button>
                     </div>
                 </form>
+
+                {% if erros %}
+                <div class="mt-4">
+                    <div class="alert alert-warning mb-3">
+                        <strong>Importação concluída com avisos.</strong>
+                        Novos alunos: <span class="fw-semibold">{{ criados }}</span> ·
+                        Atualizados: <span class="fw-semibold">{{ atualizados }}</span> ·
+                        Linhas com problema: <span class="fw-semibold">{{ erros|length }}</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Linha</th>
+                                    <th scope="col">Valor</th>
+                                    <th scope="col">Problema</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for e in erros %}
+                                <tr>
+                                    <td class="text-nowrap">{{ e.linha }}</td>
+                                    <td>{{ e.valor }}</td>
+                                    <td>{{ e.erro }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <a href="{% url 'core:aluno_list' %}" class="btn btn-primary">Ver lista de alunos</a>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>

@@ -11,7 +11,6 @@ dependencies = [
     "django>=6.1",
     "python-decouple>=3.8",
     "dj-database-url>=2.3",
-    "mcp-ollama-python>=1.0.7",
     "gunicorn>=26.0.0",
 ]
 
@@ -21,3 +20,9 @@ ebd = "ebd:main"
 [build-system]
 requires = ["uv_build>=0.12.1,<0.13.0"]
 build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-django>=4.14.0",
+]

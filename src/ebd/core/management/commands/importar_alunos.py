@@ -22,18 +22,27 @@ class Command(BaseCommand):
 
         self.stdout.write(f'Iniciando importação do arquivo: {filepath}')
         if filepath.endswith('.xlsx'):
-            alunos_data = read_xlsx_rows_from_file(filepath)
+            alunos_data, erros = read_xlsx_rows_from_file(filepath)
         elif filepath.endswith('.csv'):
-            alunos_data = read_csv_rows_from_file(filepath)
+            alunos_data, erros = read_csv_rows_from_file(filepath)
         else:
             raise CommandError('Formato de arquivo não suportado. Utilize .xlsx ou .csv.')
 
-        criados, atualizados = process_alunos_import(alunos_data)
+        criados, atualizados, erros_processamento = process_alunos_import(alunos_data)
+        erros = erros + erros_processamento
 
         self.stdout.write(
             self.style.SUCCESS(
-                f'Importação concluída com sucesso! '
-                f'Novos alunos: {criados}, Alunos atualizados: {atualizados}, Total: {len(alunos_data)}'
+                f'Importação concluída! '
+                f'Novos alunos: {criados}, Alunos atualizados: {atualizados}, '
+                f'Total: {len(alunos_data)}, Linhas com problema: {len(erros)}'
             )
         )
+
+        for e in erros:
+            self.stderr.write(
+                f'Linha {e["linha"]}: {e["valor"]} — {e["erro"]}'
+            )
+        if erros:
+            raise CommandError(f'Importação finalizada com {len(erros)} erro(s). Revise as linhas acima.')
 

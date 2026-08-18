@@ -40,4 +40,7 @@ urlpatterns = [
     path('relatorios/dominical/', views.relatorio_dominical, name='relatorio_dominical'),
     path('relatorios/mensal/', views.relatorio_mensal, name='relatorio_mensal'),
     path('relatorios/ranking/', views.relatorio_ranking, name='relatorio_ranking'),
+
+    # Auditoria
+    path('auditoria/', views.AuditoriaListView.as_view(), name='auditoria_list'),
 ]

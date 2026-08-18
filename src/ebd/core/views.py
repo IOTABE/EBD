@@ -8,21 +8,25 @@ Inclui:
 """
 import calendar
 import json
-from datetime import date
+from datetime import date, datetime
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import Count, Q
 from django.db.models.functions import TruncMonth
 from django.forms import inlineformset_factory
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.views.decorators.cache import cache_page
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 
+from .audit import registrar_manual
+from .audit_context import auditoria_suprimida, get_current_user
 from .forms import AulaForm, AlunoForm, ClasseForm, PresencaForm, ProfessorForm
-from .models import Aula, Aluno, Classe, Presenca, Professor
+from .models import Aula, Aluno, Auditoria, Classe, Presenca, Professor
 
 # =====================================================================
 # PAGINAÇÃO REUTILIZÁVEL
@@ -82,6 +86,7 @@ class PaginacaoMixin:
 # =====================================================================
 
 
+@login_required
 def dashboard(request):
     """Página inicial com gráficos de evolução mensal e assiduidade."""
 
@@ -132,7 +137,8 @@ def dashboard(request):
 # =====================================================================
 
 
-class ProfessorListView(LoginRequiredMixin, PaginacaoMixin, ListView):
+class ProfessorListView(PermissionRequiredMixin, PaginacaoMixin, ListView):
+    permission_required = 'core.view_professor'
     model = Professor
     template_name = 'core/professor_list.html'
     context_object_name = 'professores'
@@ -150,7 +156,8 @@ class ProfessorListView(LoginRequiredMixin, PaginacaoMixin, ListView):
         return context
 
 
-class ProfessorCreateView(LoginRequiredMixin, CreateView):
+class ProfessorCreateView(PermissionRequiredMixin, CreateView):
+    permission_required = 'core.add_professor'
     model = Professor
     form_class = ProfessorForm
     template_name = 'core/professor_form.html'
@@ -161,7 +168,8 @@ class ProfessorCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class ProfessorUpdateView(LoginRequiredMixin, UpdateView):
+class ProfessorUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'core.change_professor'
     model = Professor
     form_class = ProfessorForm
     template_name = 'core/professor_form.html'
@@ -172,7 +180,8 @@ class ProfessorUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class ProfessorDeleteView(LoginRequiredMixin, DeleteView):
+class ProfessorDeleteView(PermissionRequiredMixin, DeleteView):
+    permission_required = 'core.delete_professor'
     model = Professor
     template_name = 'core/professor_confirm_delete.html'
     success_url = reverse_lazy('core:professor_list')
@@ -187,7 +196,8 @@ class ProfessorDeleteView(LoginRequiredMixin, DeleteView):
 # =====================================================================
 
 
-class ClasseListView(LoginRequiredMixin, PaginacaoMixin, ListView):
+class ClasseListView(PermissionRequiredMixin, PaginacaoMixin, ListView):
+    permission_required = 'core.view_classe'
     model = Classe
     template_name = 'core/classe_list.html'
     context_object_name = 'classes'
@@ -197,7 +207,8 @@ class ClasseListView(LoginRequiredMixin, PaginacaoMixin, ListView):
     )
 
 
-class ClasseCreateView(LoginRequiredMixin, CreateView):
+class ClasseCreateView(PermissionRequiredMixin, CreateView):
+    permission_required = 'core.add_classe'
     model = Classe
     form_class = ClasseForm
     template_name = 'core/classe_form.html'
@@ -208,7 +219,8 @@ class ClasseCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class ClasseUpdateView(LoginRequiredMixin, UpdateView):
+class ClasseUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'core.change_classe'
     model = Classe
     form_class = ClasseForm
     template_name = 'core/classe_form.html'
@@ -219,7 +231,8 @@ class ClasseUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class ClasseDeleteView(LoginRequiredMixin, DeleteView):
+class ClasseDeleteView(PermissionRequiredMixin, DeleteView):
+    permission_required = 'core.delete_classe'
     model = Classe
     template_name = 'core/classe_confirm_delete.html'
     success_url = reverse_lazy('core:classe_list')
@@ -234,7 +247,8 @@ class ClasseDeleteView(LoginRequiredMixin, DeleteView):
 # =====================================================================
 
 
-class AlunoListView(LoginRequiredMixin, PaginacaoMixin, ListView):
+class AlunoListView(PermissionRequiredMixin, PaginacaoMixin, ListView):
+    permission_required = 'core.view_aluno'
     model = Aluno
     template_name = 'core/aluno_list.html'
     context_object_name = 'alunos'
@@ -257,7 +271,8 @@ class AlunoListView(LoginRequiredMixin, PaginacaoMixin, ListView):
         return context
 
 
-class AlunoCreateView(LoginRequiredMixin, CreateView):
+class AlunoCreateView(PermissionRequiredMixin, CreateView):
+    permission_required = 'core.add_aluno'
     model = Aluno
     form_class = AlunoForm
     template_name = 'core/aluno_form.html'
@@ -268,7 +283,8 @@ class AlunoCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class AlunoUpdateView(LoginRequiredMixin, UpdateView):
+class AlunoUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'core.change_aluno'
     model = Aluno
     form_class = AlunoForm
     template_name = 'core/aluno_form.html'
@@ -279,7 +295,8 @@ class AlunoUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-class AlunoDeleteView(LoginRequiredMixin, DeleteView):
+class AlunoDeleteView(PermissionRequiredMixin, DeleteView):
+    permission_required = 'core.delete_aluno'
     model = Aluno
     template_name = 'core/aluno_confirm_delete.html'
     success_url = reverse_lazy('core:aluno_list')
@@ -295,6 +312,7 @@ from .utils import read_xlsx_rows_from_file, read_csv_rows_from_file, process_al
 
 
 @login_required
+@permission_required('core.view_aluno', raise_exception=True)
 def aluno_export_view(request):
     """Exporta a lista completa de alunos para um arquivo CSV."""
     response = HttpResponse(content_type='text/csv; charset=utf-8-sig')
@@ -318,6 +336,7 @@ def aluno_export_view(request):
 
 
 @login_required
+@permission_required(['core.add_aluno', 'core.change_aluno'], raise_exception=True)
 def aluno_import_view(request):
     """Permite o upload e importação de alunos via planilha (.xlsx ou .csv)."""
     if request.method == 'POST':
@@ -329,14 +348,24 @@ def aluno_import_view(request):
         filename = arquivo.name.lower()
         try:
             if filename.endswith('.xlsx'):
-                alunos_data = read_xlsx_rows_from_file(arquivo)
+                alunos_data, erros = read_xlsx_rows_from_file(arquivo)
             elif filename.endswith('.csv'):
-                alunos_data = read_csv_rows_from_file(arquivo)
+                alunos_data, erros = read_csv_rows_from_file(arquivo)
             else:
                 messages.error(request, 'Formato inválido. Por favor envie um arquivo .xlsx ou .csv.')
                 return redirect('core:aluno_import')
 
-            criados, atualizados = process_alunos_import(alunos_data)
+            criados, atualizados, erros_processamento = process_alunos_import(alunos_data)
+            erros = erros + erros_processamento
+
+            if erros:
+                return render(request, 'core/aluno_import.html', {
+                    'criados': criados,
+                    'atualizados': atualizados,
+                    'total': len(alunos_data),
+                    'erros': erros,
+                })
+
             messages.success(
                 request,
                 f'Importação realizada com sucesso! Novos alunos: {criados}, Atualizados: {atualizados}, Total: {len(alunos_data)}'
@@ -355,7 +384,8 @@ def aluno_import_view(request):
 # =====================================================================
 
 
-class AulaListView(PaginacaoMixin, ListView):
+class AulaListView(PermissionRequiredMixin, PaginacaoMixin, ListView):
+    permission_required = 'core.view_aula'
     model = Aula
     template_name = 'core/aula_list.html'
     context_object_name = 'aulas'
@@ -379,7 +409,8 @@ class AulaListView(PaginacaoMixin, ListView):
         return context
 
 
-class AulaCreateView(CreateView):
+class AulaCreateView(PermissionRequiredMixin, CreateView):
+    permission_required = 'core.add_aula'
     model = Aula
     form_class = AulaForm
     template_name = 'core/aula_form.html'
@@ -390,7 +421,8 @@ class AulaCreateView(CreateView):
         return super().form_valid(form)
 
 
-class AulaUpdateView(UpdateView):
+class AulaUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'core.change_aula'
     model = Aula
     form_class = AulaForm
     template_name = 'core/aula_form.html'
@@ -401,7 +433,8 @@ class AulaUpdateView(UpdateView):
         return super().form_valid(form)
 
 
-class AulaDeleteView(DeleteView):
+class AulaDeleteView(PermissionRequiredMixin, DeleteView):
+    permission_required = 'core.delete_aula'
     model = Aula
     template_name = 'core/aula_confirm_delete.html'
     success_url = reverse_lazy('core:aula_list')
@@ -416,6 +449,8 @@ class AulaDeleteView(DeleteView):
 # =====================================================================
 
 
+@login_required
+@permission_required(['core.add_presenca', 'core.change_presenca'], raise_exception=True)
 def aula_chamada(request, pk):
     """Registra a chamada (presença) da aula dominical.
 
@@ -428,10 +463,13 @@ def aula_chamada(request, pk):
     aula = get_object_or_404(Aula.objects.select_related('classe'), pk=pk)
 
     # Garante uma linha de chamada para cada aluno ativo (padrão: presente).
-    for aluno in aula.classe.alunos.filter(status=Aluno.Status.ATIVO):
-        Presenca.objects.get_or_create(
-            aula=aula, aluno=aluno, defaults={'presente': True}
-        )
+    # Sinais de auditoria suprimidos: abrir a chamada apenas "garante" as
+    # linhas; a edição consciente de dados é registrada uma única vez no save.
+    with auditoria_suprimida():
+        for aluno in aula.classe.alunos.filter(status=Aluno.Status.ATIVO):
+            Presenca.objects.get_or_create(
+                aula=aula, aluno=aluno, defaults={'presente': True}
+            )
 
     presencas = aula.presencas.select_related('aluno').order_by('aluno__nome')
 
@@ -447,12 +485,29 @@ def aula_chamada(request, pk):
             request.POST, instance=aula, queryset=presencas
         )
         if formset.is_valid():
-            formset.save()
+            # Sinais de auditoria suprimidos: as linhas da chamada são
+            # salvas em lote; um único resumo é registrado abaixo.
+            with auditoria_suprimida():
+                formset.save()
             presentes = sum(1 for f in formset.forms if f.instance.presente)
+            ausentes = formset.total_form_count() - presentes
+            registrar_manual(
+                modelo='presenca',
+                objeto_id=aula.pk,
+                acao=Auditoria.Acao.EDITAR,
+                usuario=get_current_user(),
+                descricao=f'Chamada salva: {presentes} presente(s) e '
+                          f'{ausentes} ausente(s).',
+                dados={
+                    'aula': str(aula),
+                    'presentes': presentes,
+                    'ausentes': ausentes,
+                },
+            )
             messages.success(
                 request,
                 f'Chamada salva: {presentes} presente(s) e '
-                f'{formset.total_form_count() - presentes} ausente(s).',
+                f'{ausentes} ausente(s).',
             )
             return redirect('core:aula_list')
     else:
@@ -475,6 +530,9 @@ def _parse_data(param):
         return date.today()
 
 
+@login_required
+@permission_required('core.view_presenca', raise_exception=True)
+@cache_page(300)
 def relatorio_dominical(request):
     """Soma de presenças e ausências por classe em um domingo selecionado."""
     data = _parse_data(request.GET.get('data'))
@@ -539,6 +597,9 @@ def _parse_ano_mes(request):
     return ano, mes
 
 
+@login_required
+@permission_required('core.view_presenca', raise_exception=True)
+@cache_page(300)
 def relatorio_mensal(request):
     """Tabela dos 4/5 domingos do mês com totais de presença por classe.
 
@@ -619,23 +680,52 @@ def relatorio_mensal(request):
 # =====================================================================
 
 
+@login_required
+@permission_required('core.view_presenca', raise_exception=True)
+@cache_page(300)
 def relatorio_ranking(request):
     """Ranking geral e por classe do percentual de frequência.
 
-    Período apurado: do início do ano (1º de janeiro) até a data do
-    relatório. A frequência de cada aluno é calculada como o percentual
-    de chamadas em que esteve presente em relação ao total de chamadas
-    registradas para ele no período.
+    O período pode ser definido de duas formas:
+      * `?ano=YYYY` — do início do ano até hoje (ou 31/12 em anos passados);
+      * `?inicio=YYYY-MM-DD&fim=YYYY-MM-DD` — intervalo arbitrário.
+    A frequência de cada aluno é calculada como o percentual de chamadas
+    em que esteve presente em relação ao total de chamadas registradas
+    para ele no período.
     """
     hoje = date.today()
-    try:
-        ano = int(request.GET.get('ano', hoje.year))
-    except ValueError:
-        ano = hoje.year
+    ano = hoje.year
 
-    inicio = date(ano, 1, 1)
-    # No ano corrente o período termina hoje; em anos passados, em 31/12.
-    fim = min(hoje, date(ano, 12, 31))
+    def _parse_data(raw):
+        try:
+            return datetime.strptime(raw, '%Y-%m-%d').date()
+        except (ValueError, TypeError):
+            return None
+
+    inicio_raw = request.GET.get('inicio')
+    fim_raw = request.GET.get('fim')
+    inicio = _parse_data(inicio_raw)
+    fim = _parse_data(fim_raw)
+
+    erro_periodo = None
+    periodo_personalizado = False
+    if inicio is not None or fim is not None:
+        if inicio is None or fim is None or fim < inicio:
+            erro_periodo = 'Intervalo de datas inválido — informe início e fim (início ≤ fim).'
+            inicio = fim = None
+        else:
+            periodo_personalizado = True
+
+    if inicio is None or fim is None:
+        try:
+            ano = int(request.GET.get('ano', hoje.year))
+        except ValueError:
+            ano = hoje.year
+        inicio = date(ano, 1, 1)
+        fim = min(hoje, date(ano, 12, 31))
+        rotulo_periodo = str(ano)
+    else:
+        rotulo_periodo = f'{inicio:%d/%m/%Y} a {fim:%d/%m/%Y}'
 
     presencas = (
         Presenca.objects.filter(aula__data__range=[inicio, fim])
@@ -683,7 +773,63 @@ def relatorio_ranking(request):
         'ano': ano,
         'inicio': inicio,
         'fim': fim,
+        'rotulo_periodo': rotulo_periodo,
+        'erro_periodo': erro_periodo,
+        'periodo_personalizado': periodo_personalizado,
         'ranking_geral': ranking,
         'ranking_por_classe': ranking_por_classe,
     }
     return render(request, 'core/relatorio_ranking.html', context)
+
+
+# =====================================================================
+# AUDITORIA
+# =====================================================================
+
+
+class AuditoriaListView(PermissionRequiredMixin, PaginacaoMixin, ListView):
+    """Lista os registros da trilha de auditoria com filtros."""
+
+    permission_required = 'core.view_auditoria'
+    model = Auditoria
+    template_name = 'core/auditoria_list.html'
+    context_object_name = 'registros'
+
+    def get_queryset(self):
+        qs = Auditoria.objects.select_related('usuario')
+        q = self.request.GET.get('q', '').strip()
+        modelo = self.request.GET.get('modelo', '').strip()
+        acao = self.request.GET.get('acao', '').strip()
+        usuario_id = self.request.GET.get('usuario', '').strip()
+        data_inicio = self.request.GET.get('data_inicio', '').strip()
+        data_fim = self.request.GET.get('data_fim', '').strip()
+
+        if q:
+            qs = qs.filter(descricao__icontains=q)
+        if modelo:
+            qs = qs.filter(modelo=modelo)
+        if acao:
+            qs = qs.filter(acao=acao)
+        if usuario_id:
+            qs = qs.filter(usuario_id=usuario_id)
+        if data_inicio:
+            qs = qs.filter(criado_em__date__gte=data_inicio)
+        if data_fim:
+            qs = qs.filter(criado_em__date__lte=data_fim)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        contexto = {
+            c: self.request.GET.get(c, '').strip()
+            for c in ('q', 'modelo', 'acao', 'usuario', 'data_inicio', 'data_fim')
+        }
+        context.update(contexto)
+        context['acoes'] = Auditoria.Acao.choices
+        context['modelos'] = (
+            Auditoria.objects.order_by('modelo')
+            .values_list('modelo', flat=True)
+            .distinct()
+        )
+        context['lista_usuarios'] = get_user_model().objects.order_by('username')
+        return context

@@ -40,6 +40,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'ebd.core.audit_context.AuditMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -92,9 +93,22 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = 'pt-br'
+
 TIME_ZONE = 'America/Sao_Paulo'
 USE_I18N = True
 USE_TZ = True
+
+# ------------------------------------------------------------ Cache
+# Cache em memória para as consultas de agregação dos relatórios
+# (relatorio_dominical, relatorio_mensal, relatorio_ranking).
+# Em produção, pode ser trocado por Redis/Memcached.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'ebd-cache',
+        'TIMEOUT': 300,  # 5 minutos
+    }
+}
 
 # ------------------------------------------------------------ Autenticação
 LOGIN_URL = 'login'

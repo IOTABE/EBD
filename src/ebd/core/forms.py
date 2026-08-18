@@ -2,7 +2,7 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 
-from .models import Aula, Aluno, Classe, Presenca, Professor
+from .models import Aula, Aluno, Classe, Presenca, Professor, normalizar_nome
 
 
 class LoginForm(AuthenticationForm):
@@ -70,6 +70,23 @@ class AlunoForm(forms.ModelForm):
                 attrs={'type': 'date'}, format='%Y-%m-%d'
             ),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        nome = cleaned_data.get('nome')
+        classe = cleaned_data.get('classe')
+        if nome and classe:
+            duplicado = (
+                Aluno.objects
+                .filter(nome_normalizado=normalizar_nome(nome), classe=classe)
+                .exclude(pk=self.instance.pk)
+                .exists()
+            )
+            if duplicado:
+                raise forms.ValidationError(
+                    f'Já existe um aluno com o nome "{nome}" nesta classe.'
+                )
+        return cleaned_data
 
 
 class AulaForm(forms.ModelForm):

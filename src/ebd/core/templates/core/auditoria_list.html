@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %}Auditoria — EBD{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h2 class="mb-0">Trilha de auditoria</h2>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-md-3">
+        <input type="text" name="q" value="{{ q }}" class="form-control"
+               placeholder="Buscar na descrição...">
+    </div>
+    <div class="col-md-2">
+        <select name="modelo" class="form-select">
+            <option value="">Todos os modelos</option>
+            {% for m in modelos %}
+                <option value="{{ m }}" {% if modelo == m %}selected{% endif %}>{{ m }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select name="acao" class="form-select">
+            <option value="">Todas as ações</option>
+            {% for valor, rotulo in acoes %}
+                <option value="{{ valor }}" {% if acao == valor %}selected{% endif %}>{{ rotulo }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select name="usuario" class="form-select">
+            <option value="">Todos os usuários</option>
+            {% for u in lista_usuarios %}
+                <option value="{{ u.pk }}" {% if usuario == u.pk|stringformat:'s' %}selected{% endif %}>{{ u.username }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-1">
+        <input type="date" name="data_inicio" value="{{ data_inicio }}" class="form-control"
+               title="Data inicial">
+    </div>
+    <div class="col-md-1">
+        <input type="date" name="data_fim" value="{{ data_fim }}" class="form-control"
+               title="Data final">
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+        {% if q or modelo or acao or usuario or data_inicio or data_fim %}
+            <a href="{% url 'core:auditoria_list' %}" class="btn btn-outline-secondary">Limpar</a>
+        {% endif %}
+    </div>
+</form>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Data/Hora</th>
+                    <th>Usuário</th>
+                    <th>Ação</th>
+                    <th>Modelo / ID</th>
+                    <th>Resumo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for registro in registros %}
+                <tr>
+                    <td class="text-nowrap">{{ registro.criado_em|date:'d/m/Y H:i' }}</td>
+                    <td>{{ registro.usuario.username|default:'Sistema' }}</td>
+                    <td>
+                        {% for valor, rotulo in acoes %}
+                            {% if registro.acao == valor %}
+                                <span class="badge
+                                    {% if registro.acao == 'excluir' %}text-bg-danger
+                                    {% elif registro.acao == 'criar' %}text-bg-success
+                                    {% elif registro.acao == 'login' %}text-bg-primary
+                                    {% elif registro.acao == 'logout' %}text-bg-secondary
+                                    {% elif registro.acao == 'falha_login' %}text-bg-warning
+                                    {% else %}text-bg-info{% endif %}">{{ rotulo }}</span>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {{ registro.modelo }}
+                        {% if registro.objeto_id %}
+                            <span class="text-muted">#{{ registro.objeto_id }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ registro.resumo }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center text-muted py-4">Nenhum registro de auditoria.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if is_paginated %}
+        {% include 'core/_paginacao.html' %}
+    {% endif %}
+</div>
+{% endblock %}

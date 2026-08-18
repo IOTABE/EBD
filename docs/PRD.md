@@ -1,6 +1,6 @@
 # PRD — Sistema de Gestão da Escola Bíblica Dominical (EBD)
 
-- **Versão do documento:** 1.0
+- **Versão do documento:** 1.1
 - **Status:** Documentação do sistema atual (as-built)
 - **Público:** Desenvolvedores
 - **Repositório:** `/home/gti/Develop/EBD`
@@ -73,8 +73,10 @@ Arquitetura **monolítica** Django clássica (MTV) com um único app `core`:
     ├── urls.py            # rotas raiz: admin, login, auth, core
     ├── wsgi.py / asgi.py
     └── core/
-        ├── models.py      # Professor, Classe, Aluno, Aula, Presenca
-        ├── views.py       # CRUDs, chamada, relatórios, dashboard, import/export
+        ├── models.py      # Professor, Classe, Aluno, Aula, Presenca, Auditoria
+        ├── audit.py       # sinais de auditoria + registrar_manual
+        ├── audit_context.py # usuário atual (thread-local) + AuditoriaMiddleware
+        ├── views.py       # CRUDs, chamada, relatórios, dashboard, import/export, auditoria
         ├── forms.py       # formulários + LoginForm (Bootstrap)
         ├── admin.py       # registro no Django Admin
         ├── utils.py       # leitura .xlsx/.csv, parsing de data/telefone
@@ -116,13 +118,15 @@ Arquitetura **monolítica** Django clássica (MTV) com um único app `core`:
 | **Aluno** | nome, data_nascimento, telefone, status (`ativo`/`inativo`), classe, criado_em | FK → Classe (`PROTECT`) | — |
 | **Aula** | data, classe, licao, observacoes, criado_em | FK → Classe (`CASCADE`) | Única aula por (classe, data) |
 | **Presenca** | aula, aluno, presente (`default=True`), registrado_em | FK → Aula, FK → Aluno (ambos `CASCADE`) | Único registro por (aula, aluno) |
+| **Auditoria** | modelo, objeto_id, acao (`criar`/`editar`/`excluir`/`login`/`logout`/`falha_login`), usuario, descricao, dados (JSON), criado_em | FK → User (`SET_NULL`) | Read-only no Admin e na tela `/auditoria/` |
 
 ### Notas de integridade
 
 - `Aluno.classe` usa `on_delete=PROTECT` — não é possível excluir uma classe com alunos.
 - `Aula.classe` e `Presenca.*` usam `CASCADE` — excluir aula/do aluno remove as presenças.
 - `Classe.MAX_PROFESSORES = 4`, validado em `Classe.clean()` e `ClasseForm.clean_professores()`.
-- Sem campos de auditoria de usuário (quem criou/alterou) — apenas `criado_em`/`registrado_em`.
+- Todos os modelos de negócio herdam `AuditMixin` → campos `criado_por`/`atualizado_por` (FK usuário, read-only no Admin).
+- Toda operação relevante gera registro em **`Auditoria`** via sinais do Django (`audit.py`); importação de planilha e chamada geram um resumo único via `registrar_manual`.
 
 ## 7. Requisitos funcionais
 
@@ -188,6 +192,14 @@ Arquitetura **monolítica** Django clássica (MTV) com um único app `core`:
 ### RF-12 — Django Admin
 - Todos os modelos registrados com `list_display`, `list_filter`, `search_fields`.
 - `AlunoAdmin.list_editable = ('status',)` — troca rápida de status.
+- Campos `criado_por`/`atualizado_por` como `readonly_fields`.
+
+### RF-13 — Auditoria
+- Registro automático (sinais) de criação, edição e exclusão de **Professor, Classe, Aluno, Aula, Presenca**, incluindo alteração de vínculo de professores da classe (M2M) — com diff `antes → depois` no `resumo()`.
+- Auditoria de **login, logout e falha de login** via sinais do Django auth.
+- Operações em lote (importação de planilha e chamada de presença) geram **um** registro consolidado por operação (evita ruído).
+- Tela `/auditoria/` (login obrigatório) com filtros por busca na descrição, modelo, ação, usuário e intervalo de datas + paginação.
+- Registro **read-only** (`AuditoriaAdmin`): sem add/change/delete.
 
 ## 8. Regras de negócio
 
@@ -258,6 +270,7 @@ Arquitetura **monolítica** Django clássica (MTV) com um único app `core`:
 | `/relatorios/dominical/` | `relatorio_dominical` | `core:relatorio_dominical` |
 | `/relatorios/mensal/` | `relatorio_mensal` | `core:relatorio_mensal` |
 | `/relatorios/ranking/` | `relatorio_ranking` | `core:relatorio_ranking` |
+| `/auditoria/` | `AuditoriaListView` | `core:auditoria_list` |
 
 ## 12. Variáveis de ambiente
 
@@ -287,14 +300,14 @@ O projeto **não possui testes automatizados** (`tests.py` ausente). A verifica�
 | # | Limitação | Impacto | Melhoria sugerida |
 |---|-----------|---------|-------------------|
 | L1 | Aulas sem `LoginRequired` | Dados expostos sem autenticação | Aplicar mixin/decorator nas views de aula |
-| L2 | Sem perfil/papéis de usuário | Todos acessam tudo | Introduzir grupos/permissões ou roles |
-| L3 | Sem auditoria de alterações | Não se sabe quem mudou dados | Campos `created_by`/`updated_by` ou histórico |
-| L4 | Importação sem relatório de erros por linha | Falhas silenciosas | Coletar erros por linha e reportar |
-| L5 | Duplicação de alunos não tratada | Aluno duplicado se nome variar | Normalizar busca por nome + classe (casefold) |
-| L6 | Ranking só anual (jan→hoje) | Não cobre períodos arbitrários | Permitir intervalo de datas |
-| L7 | Sem testes automatizados | Risco de regressão | Suíte pytest |
-| L8 | Sem cache/otimização de queries pesadas | Relatórios mensais com muitas classes | Indexação + cache de agregações |
-| L9 | Dependência `mcp-ollama-python` sem uso visível | Dependência fantasma | Remover ou documentar o uso |
+| L2 | Sem perfil/papéis de usuário | Todos acessam tudo | ✅ **Implementado** — grupos `Administrador`, `Secretaria`, `Professor` com permissões via `django.contrib.auth`; comando `criar_grupos` sincroniza idempotentemente; views protegidas com `PermissionRequiredMixin` / `@permission_required`; menu condicional por `perms` no template |
+| L3 | Sem auditoria de alterações | Não se sabe quem mudou dados | ✅ **Implementado** — `Auditoria` + `criado_por`/`atualizado_por`, tela `/auditoria/` e registro no Admin |
+| L4 | Importação sem relatório de erros por linha | Falhas silenciosas | ✅ **Implementado** — leitores de `.xlsx`/`.csv` e `process_alunos_import` retornam `erros` por linha (nome vazio, data inválida, falha de processamento); tela de importação exibe relatório (Linha/Valor/Problema) e comando `importar_alunos` imprime os erros e falha com `CommandError` |
+| L5 | Duplicação de alunos não tratada | Aluno duplicado se nome variar | ✅ **Implementado** — campo `nome_normalizado` (casefold + sem acentos), `UniqueConstraint` `aluno_unico_nome_normalizado_por_classe` no banco, validação amigável no formulário e deduplicação na importação |
+| L6 | Ranking só anual (jan→hoje) | Não cobre períodos arbitrários | ✅ **Implementado** — parâmetros `inicio`/`fim` (YYYY-MM-DD) para intervalo arbitrário com rótulo "d/m/Y a d/m/Y", fallback `ano` (jan→hoje), erro amigável para intervalo inválido e fallback ao modo ano para datas malformadas |
+| L7 | Sem testes automatizados | Risco de regressão | ✅ **Implementado** — suíte `pytest` + `django.test` cobrindo RN-01 a RN-10 (17 testes em `src/ebd/core/tests/test_regras_negocio.py`) |
+| L8 | Sem cache/otimização de queries pesadas | Relatórios mensais com muitas classes | ✅ **Implementado** — índice em `Aula.data` e índice composto `(aula, presente)` em `Presenca` (migração `0005`), `CACHES` LocMem (300s) e `@cache_page` nos relatórios dominical/mensal/ranking |
+| L9 | Dependência `mcp-ollama-python` sem uso visível | Dependência fantasma | ✅ **Implementado** — dependência e seus 36 pacotes transitivos removidos via `uv remove mcp-ollama-python` (nenhum uso no código) |continue
 
 ## 15. Critérios de aceite (conclusão da documentação)
 
@@ -305,4 +318,5 @@ O sistema atual atende aos objetivos **O1–O5** com a seguinte cobertura:
 - ✅ Dashboard com gráficos.
 - ✅ Importação/exportação de alunos.
 - ✅ Deploy automatizado e HTTPS em produção.
+- ✅ Auditoria completa (RF-13) — trilha automática + tela `/auditoria/` + Admin read-only.
 - ⚠️ Acesso sem controle de permissões e sem testes automatizados (ver §13 e §14).

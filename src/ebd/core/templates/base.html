@@ -17,19 +17,34 @@
             </button>
             <div class="collapse navbar-collapse" id="navMenu">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="{% url 'core:dashboard' %}">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'core:professor_list' %}">Professores</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'core:classe_list' %}">Classes</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'core:aluno_list' %}">Alunos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'core:aula_list' %}">Aulas</a></li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Relatórios</a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{% url 'core:relatorio_dominical' %}">Geral Dominical</a></li>
-                            <li><a class="dropdown-item" href="{% url 'core:relatorio_mensal' %}">Mensal</a></li>
-                            <li><a class="dropdown-item" href="{% url 'core:relatorio_ranking' %}">Ranking de Frequência</a></li>
-                        </ul>
-                    </li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'core:dashboard' %}">Dashboard</a></li>
+                        {% if perms.core.view_professor %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'core:professor_list' %}">Professores</a></li>
+                        {% endif %}
+                        {% if perms.core.view_classe %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'core:classe_list' %}">Classes</a></li>
+                        {% endif %}
+                        {% if perms.core.view_aluno %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'core:aluno_list' %}">Alunos</a></li>
+                        {% endif %}
+                        {% if perms.core.view_aula %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'core:aula_list' %}">Aulas</a></li>
+                        {% endif %}
+                        {% if perms.core.view_auditoria %}
+                            <li class="nav-item"><a class="nav-link" href="{% url 'core:auditoria_list' %}">Auditoria</a></li>
+                        {% endif %}
+                        {% if perms.core.view_presenca %}
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Relatórios</a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{% url 'core:relatorio_dominical' %}">Geral Dominical</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'core:relatorio_mensal' %}">Mensal</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'core:relatorio_ranking' %}">Ranking de Frequência</a></li>
+                                </ul>
+                            </li>
+                        {% endif %}
+                    {% endif %}
                 </ul>
                 <div class="d-flex align-items-center gap-2">
                     <a class="btn btn-outline-light btn-sm" href="{% url 'admin:index' %}">Admin</a>

@@ -13,9 +13,21 @@
         <input type="number" id="ano" name="ano" value="{{ ano }}" class="form-control" style="width: 100px;">
     </div>
     <div class="col-auto">
+        <label for="inicio" class="form-label">Data inicial</label>
+        <input type="date" id="inicio" name="inicio" value="{% if periodo_personalizado %}{{ inicio|date:'Y-m-d' }}{% endif %}" class="form-control">
+    </div>
+    <div class="col-auto">
+        <label for="fim" class="form-label">Data final</label>
+        <input type="date" id="fim" name="fim" value="{% if periodo_personalizado %}{{ fim|date:'Y-m-d' }}{% endif %}" class="form-control">
+    </div>
+    <div class="col-auto">
         <button type="submit" class="btn btn-primary">Filtrar</button>
     </div>
 </form>
+
+{% if erro_periodo %}
+<div class="alert alert-danger">{{ erro_periodo }}</div>
+{% endif %}
 
 <p class="text-muted">
     Período apurado: <strong>{{ inicio|date:'d/m/Y' }}</strong> até <strong>{{ fim|date:'d/m/Y' }}</strong>.
@@ -23,7 +35,7 @@
 </p>
 
 <div class="card shadow-sm mb-4">
-    <div class="card-header bg-white fw-semibold">Ranking Geral — {{ ano }}</div>
+    <div class="card-header bg-white fw-semibold">Ranking Geral — {{ rotulo_periodo }}</div>
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
             <thead class="table-light">
@@ -58,7 +70,7 @@
     </div>
 </div>
 
-<h3 class="mb-3">Ranking por Classe — {{ ano }}</h3>
+<h3 class="mb-3">Ranking por Classe — {{ rotulo_periodo }}</h3>
 {% for bloco in ranking_por_classe %}
 <div class="card shadow-sm mb-4">
     <div class="card-header bg-white fw-semibold">{{ bloco.classe }}</div>
