@@ -3,7 +3,7 @@ name: Deploy para Servidor de Produção
 on: 
   push:
     branches:
-      - main  # Executa o deploy sempre que houver um push na branch main
+      - master  # Executa o deploy sempre que houver um push na branch master
 
 jobs:
   deploy:
@@ -22,7 +22,7 @@ jobs:
             cd /www/wwwroot/ibnj.top
 
             # 2. Baixar as atualizações do repositório
-            git pull origin main
+            git pull origin master
 
             # 3. Ativar a venv e atualizar dependências (se houver)
             source venv/bin/activate
