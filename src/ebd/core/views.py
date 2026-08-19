@@ -25,7 +25,9 @@ from django.views.generic.list import ListView
 
 from .audit import registrar_manual
 from .audit_context import auditoria_suprimida, get_current_user
-from .forms import AulaForm, AlunoForm, ClasseForm, PresencaForm, ProfessorForm
+from .forms import (
+    AulaCreateForm, AulaForm, AlunoForm, ClasseForm, PresencaForm, ProfessorForm,
+)
 from .models import Aula, Aluno, Auditoria, Classe, Presenca, Professor
 
 # =====================================================================
@@ -412,13 +414,46 @@ class AulaListView(PermissionRequiredMixin, PaginacaoMixin, ListView):
 class AulaCreateView(PermissionRequiredMixin, CreateView):
     permission_required = 'core.add_aula'
     model = Aula
-    form_class = AulaForm
+    form_class = AulaCreateForm
     template_name = 'core/aula_form.html'
     success_url = reverse_lazy('core:aula_list')
 
     def form_valid(self, form):
-        messages.success(self.request, 'Aula registrada com sucesso.')
-        return super().form_valid(form)
+        data = form.cleaned_data['data']
+        licao = form.cleaned_data['licao']
+        observacoes = form.cleaned_data['observacoes']
+
+        classes_com_aula = set(
+            Aula.objects.filter(data=data).values_list('classe_id', flat=True)
+        )
+        criadas = 0
+        ignoradas = 0
+        for classe in Classe.objects.all():
+            if classe.pk in classes_com_aula:
+                ignoradas += 1
+                continue
+            Aula.objects.create(
+                data=data, classe=classe, licao=licao, observacoes=observacoes,
+            )
+            criadas += 1
+
+        if criadas:
+            messages.success(
+                self.request,
+                f'{criadas} aula(s) criada(s) para {criadas} classe(s) em '
+                f'{data.strftime("%d/%m/%Y")}.',
+            )
+        if ignoradas:
+            messages.warning(
+                self.request,
+                f'{ignoradas} classe(s) já possuíam aula nesta data e foram '
+                'ignoradas.',
+            )
+        if not criadas and not ignoradas:
+            messages.warning(
+                self.request, 'Nenhuma classe cadastrada para criar a aula.'
+            )
+        return redirect('core:aula_list')
 
 
 class AulaUpdateView(PermissionRequiredMixin, UpdateView):

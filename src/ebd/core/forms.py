@@ -100,6 +100,27 @@ class AulaForm(forms.ModelForm):
         }
 
 
+class AulaCreateForm(forms.ModelForm):
+    """Formulário de nova aula.
+
+    Sem o campo ``classe``: a aula é criada automaticamente para TODAS as
+    classes na data informada (as que ainda não possuem aula nesse dia).
+    """
+
+    class Meta:
+        model = Aula
+        fields = ['data', 'licao', 'observacoes']
+        widgets = {
+            'data': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            'licao': forms.TextInput(attrs={'placeholder': 'Ex.: Lição 10 — ...'}),
+            'observacoes': forms.Textarea(attrs={'rows': 3}),
+        }
+        help_texts = {
+            'licao': 'A aula será criada automaticamente para todas as classes '
+                     'na data informada.',
+        }
+
+
 class PresencaForm(forms.ModelForm):
     """Formulário de uma linha de chamada (usado dentro do formset)."""
 
