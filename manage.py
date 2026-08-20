@@ -5,9 +5,13 @@ Uso: python manage.py runserver | makemigrations | migrate | createsuperuser
 """
 import os
 import sys
+from pathlib import Path
 
 
 def main() -> None:
+    # Projeto em layout "src/": garante que o código do checkout atual seja
+    # usado (e não uma cópia instalada em site-packages).
+    sys.path.insert(0, str(Path(__file__).resolve().parent / 'src'))
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ebd.settings')
     try:
         from django.core.management import execute_from_command_line

@@ -119,8 +119,11 @@ LOGOUT_REDIRECT_URL = 'login'
 
 # ------------------------------------------------------------ Arquivos estáticos
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+# STATIC_ROOT pode ser fixado via env (ex.: STATIC_ROOT=/www/wwwroot/ibnj.top/staticfiles)
+# caso o web server sirva os estáticos por um caminho específico.
+STATIC_ROOT = Path(config('STATIC_ROOT', default=str(BASE_DIR / 'staticfiles')))
+# Os estáticos do app ficam dentro do pacote (ebd/core/static) e são
+# encontrados pelos finders; não há diretório externo "static/".
 # Storage dos estáticos (o antigo STATICFILES_STORAGE foi removido no Django 5.1).
 # Manifest + compressão do WhiteNoise: gera nomes com hash e cache-busting.
 STORAGES = {

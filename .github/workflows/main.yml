@@ -28,6 +28,11 @@ jobs:
             source venv/bin/activate
             pip install -r requirements.txt
 
+            # 3.1. Instalar o projeto a partir do checkout (editable), para que
+            # o código executado seja o do git pull e não uma cópia antiga
+            # instalada em site-packages.
+            pip install -e /www/wwwroot/ibnj.top
+
             # 4. Rodar migrações do banco e coletar arquivos estáticos
             python manage.py migrate --noinput
             python manage.py collectstatic --noinput
