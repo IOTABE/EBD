@@ -7,7 +7,7 @@ wheels/
 *.egg-info
 provi
 .env 
-
+staticfiles
 # Virtual environments
 .venv
 
