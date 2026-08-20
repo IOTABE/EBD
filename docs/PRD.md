@@ -319,4 +319,4 @@ O sistema atual atende aos objetivos **O1–O5** com a seguinte cobertura:
 - ✅ Importação/exportação de alunos.
 - ✅ Deploy automatizado e HTTPS em produção.
 - ✅ Auditoria completa (RF-13) — trilha automática + tela `/auditoria/` + Admin read-only.
-- ⚠️ Acesso sem controle de permissões e sem testes automatizados (ver §13 e §14).
+- ⚠️ Acesso sem controle de permissões e sem testes automatizados (ver §13 e §14).  
