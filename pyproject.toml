@@ -1,7 +1,7 @@
 [project]
 name = "ebd"
 version = "0.1.0"
-description = "Add your description here"
+description = "Controle de Secretaria da EBD"
 readme = "README.md"
 authors = [
     { name = "João Barboasa", email = "iotabe@iotabe.adm.br" }
@@ -27,3 +27,4 @@ dev = [
     "pytest>=9.1.1",
     "pytest-django>=4.14.0",
 ]
+
