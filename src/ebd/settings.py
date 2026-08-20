@@ -111,6 +111,7 @@ CACHES = {
     }
 }
 
+#
 # ------------------------------------------------------------ Autenticação
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'core:dashboard'
