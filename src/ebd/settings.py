@@ -6,21 +6,45 @@ Banco de dados:
 """
 from pathlib import Path
 
-from decouple import config
+from decouple import AutoConfig, Config, RepositoryEnv
 import dj_database_url
 
 # ---------------------------------------------------------------- Base
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+def _carregar_config():
+    """Carrega o .env do projeto independentemente do diretório de execução.
+
+    O gunicorn de produção é iniciado sem ``--chdir``/``--pythonpath``, então o
+    CWD não é o do projeto. Buscamos o ``.env`` primeiro na raiz do código
+    (BASE_DIR/../) e depois no diretório do settings; caso contrário usamos os
+    padrões (desenvolvimento).
+    """
+    for caminho in (BASE_DIR, BASE_DIR.parent):
+        env = caminho / '.env'
+        if env.exists():
+            return Config(RepositoryEnv(str(env)))
+    return AutoConfig(search_path=str(BASE_DIR))
+
+
+config = _carregar_config()
+
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-only-change-me')
 
 DEBUG = config('DEBUG', default=True, cast=bool)
+
+# Domínios canônicos do site. Fonte única para ALLOWED_HOSTS e
+# CSRF_TRUSTED_ORIGINS — garante que "www" nunca seja esquecido em produção.
+DOMINIOS = ['ibnj.top', 'www.ibnj.top']
 
 ALLOWED_HOSTS = config(
     'ALLOWED_HOSTS',
     default='localhost,127.0.0.1',
     cast=lambda v: [h.strip() for h in v.split(',') if h.strip()],
 )
+# Sempre aceita os domínios do site, mesmo que faltem no .env de produção.
+ALLOWED_HOSTS = list(dict.fromkeys(ALLOWED_HOSTS + DOMINIOS))
 
 # ------------------------------------------------------------ Aplicações
 INSTALLED_APPS = [
@@ -141,7 +165,7 @@ STORAGES = {
 if not DEBUG:
     # Confia no cabeçalho X-Forwarded-Proto enviado pelo proxy reverso.
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    CSRF_TRUSTED_ORIGINS = ['https://ibnj.top', 'https://www.ibnj.top']
+    CSRF_TRUSTED_ORIGINS = [f'https://{d}' for d in DOMINIOS]
 
     # Redireciona todo o tráfego HTTP para HTTPS.
     SECURE_SSL_REDIRECT = True
