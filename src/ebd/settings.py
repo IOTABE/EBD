@@ -129,6 +129,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 if not DEBUG:
     # Confia no cabeçalho X-Forwarded-Proto enviado pelo proxy reverso.
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    CSRF_TRUSTED_ORIGINS = ['https://ibnj.top', 'https://www.ibnj.top']
 
     # Redireciona todo o tráfego HTTP para HTTPS.
     SECURE_SSL_REDIRECT = True
