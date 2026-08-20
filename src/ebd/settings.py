@@ -120,8 +120,17 @@ LOGOUT_REDIRECT_URL = 'login'
 # ------------------------------------------------------------ Arquivos estáticos
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / 'static']    
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+# Storage dos estáticos (o antigo STATICFILES_STORAGE foi removido no Django 5.1).
+# Manifest + compressão do WhiteNoise: gera nomes com hash e cache-busting.
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
 
 # ------------------------------------------------------------ HTTPS (produção)
 # Aplicável apenas com DEBUG=False (servidor por trás de proxy reverso que
