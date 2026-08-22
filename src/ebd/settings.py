@@ -40,11 +40,28 @@ DOMINIOS = ['ibnj.top', 'www.ibnj.top', "10.0.0.62"]
 
 ALLOWED_HOSTS = config(
     'ALLOWED_HOSTS',
-    default='localhost,127.0.0.1',
+    default='localhost,127.0.0.1,10.0.0.62',
     cast=lambda v: [h.strip() for h in v.split(',') if h.strip()],
 )
 # Sempre aceita os domínios do site, mesmo que faltem no .env de produção.
 ALLOWED_HOSTS = list(dict.fromkeys(ALLOWED_HOSTS + DOMINIOS))
+
+# CSRF Trusted Origins — aceita origens HTTP e HTTPS para todos os domínios e IPs
+_env_csrf = config(
+    'CSRF_TRUSTED_ORIGINS',
+    default='',
+    cast=lambda v: [o.strip() for o in v.split(',') if o.strip()],
+)
+_origins = list(_env_csrf)
+for h in ALLOWED_HOSTS:
+    if h not in ('*', ''):
+        if h.startswith(('http://', 'https://')):
+            _origins.append(h)
+        else:
+            _origins.append(f'http://{h}')
+            _origins.append(f'https://{h}')
+
+CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(_origins))
 
 # ------------------------------------------------------------ Aplicações
 INSTALLED_APPS = [
@@ -165,7 +182,6 @@ STORAGES = {
 if not DEBUG:
     # Confia no cabeçalho X-Forwarded-Proto enviado pelo proxy reverso.
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    CSRF_TRUSTED_ORIGINS = [f'https://{d}' for d in DOMINIOS]
 
     # Redireciona todo o tráfego HTTP para HTTPS.
     SECURE_SSL_REDIRECT = True

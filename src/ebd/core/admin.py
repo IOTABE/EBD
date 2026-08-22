@@ -1,7 +1,11 @@
-"""Registro dos modelos no Django Admin."""
 from django.contrib import admin
 
 from .models import Aula, Aluno, Auditoria, Classe, Presenca, Professor
+
+# Personalização dos Títulos do Django Admin
+admin.site.site_header = "Sistema de Gerenciamento de EBD"
+admin.site.site_title = "Sistema de Gerenciamento de EBD"
+admin.site.index_title = "Painel de Administração da EBD"
 
 
 @admin.register(Professor)

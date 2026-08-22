@@ -1,0 +1,334 @@
+/* ==========================================================================
+   EBD Gestão - Estilos Customizados do Django Admin (Glassmorphism + Material Design)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --admin-font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --primary-color: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-light: rgba(79, 70, 229, 0.12);
+    --glass-bg: rgba(255, 255, 255, 0.78);
+    --glass-border: rgba(255, 255, 255, 0.85);
+    --glass-border-subtle: rgba(226, 232, 240, 0.6);
+    --glass-shadow: 0 12px 32px 0 rgba(31, 38, 135, 0.08), 0 4px 12px 0 rgba(0, 0, 0, 0.03);
+    --glass-blur: blur(16px) saturate(180%);
+    --radius-sm: 0.5rem;
+    --radius-md: 0.85rem;
+    --radius-lg: 1.25rem;
+}
+
+/* Base Body e Fundo */
+html, body, #container {
+    font-family: var(--admin-font-family) !important;
+    background: #f1f5f9 !important;
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(6, 182, 212, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.1) 0px, transparent 50%) !important;
+    background-attachment: fixed !important;
+    color: #1e293b !important;
+    min-height: 100vh;
+}
+
+/* Glass Header do Admin */
+#header {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: var(--glass-blur) !important;
+    -webkit-backdrop-filter: var(--glass-blur) !important;
+    border-bottom: 1px solid var(--glass-border) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+    color: #0f172a !important;
+    padding: 0.85rem 1.5rem !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#header a {
+    color: #0f172a !important;
+}
+
+#header #branding h1 {
+    font-weight: 800 !important;
+    font-size: 1.25rem !important;
+    letter-spacing: -0.02em !important;
+    margin: 0 !important;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+#header #branding h1 a {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none !important;
+}
+
+#user-tools {
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+}
+
+#user-tools a {
+    background: var(--primary-light) !important;
+    color: var(--primary-color) !important;
+    padding: 0.4rem 0.8rem !important;
+    border-radius: var(--radius-md) !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease !important;
+    font-weight: 600 !important;
+}
+
+#user-tools a:hover {
+    background: var(--primary-color) !important;
+    color: #ffffff !important;
+}
+
+/* Sidebar Lateral (Navegação por Apps) */
+#nav-sidebar {
+    background: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: var(--glass-blur) !important;
+    border-right: 1px solid var(--glass-border) !important;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.02) !important;
+}
+
+#nav-sidebar .module th {
+    background: transparent !important;
+    font-weight: 700 !important;
+    color: #475569 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    font-size: 0.75rem !important;
+}
+
+#nav-sidebar .module td a {
+    font-weight: 600 !important;
+    color: #334155 !important;
+    padding: 0.6rem 0.9rem !important;
+    border-radius: var(--radius-sm) !important;
+    display: block;
+    transition: all 0.2s ease !important;
+}
+
+#nav-sidebar .module tr.current-model td a,
+#nav-sidebar .module td a:hover {
+    background: var(--primary-light) !important;
+    color: var(--primary-color) !important;
+}
+
+/* Containers Glass Principais */
+#content {
+    padding: 1.5rem !important;
+}
+
+.dashboard #content-main {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.module, .inline-group, #changelist-filter, .card-glass {
+    background: var(--glass-bg) !important;
+    backdrop-filter: var(--glass-blur) !important;
+    -webkit-backdrop-filter: var(--glass-blur) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--glass-shadow) !important;
+    margin-bottom: 1.5rem !important;
+    overflow: hidden;
+}
+
+.module caption, .module h2, .inline-group h2 {
+    background: rgba(255, 255, 255, 0.5) !important;
+    border-bottom: 1px solid var(--glass-border-subtle) !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    padding: 0.85rem 1.25rem !important;
+    font-size: 1rem !important;
+}
+
+/* Tabelas do Admin (`#result_list`) */
+#changelist #result_list, table {
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    background: transparent !important;
+}
+
+#result_list th, table thead th {
+    background: rgba(241, 245, 249, 0.7) !important;
+    color: #475569 !important;
+    font-weight: 700 !important;
+    font-size: 0.8rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    padding: 0.85rem 1rem !important;
+    border-bottom: 1px solid var(--glass-border-subtle) !important;
+}
+
+#result_list td, table tbody td {
+    padding: 0.85rem 1rem !important;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.5) !important;
+    font-size: 0.9rem !important;
+    vertical-align: middle !important;
+}
+
+#result_list tbody tr:hover, table tbody tr:hover {
+    background-color: rgba(79, 70, 229, 0.04) !important;
+}
+
+/* Filtros Laterais (`#changelist-filter`) */
+#changelist-filter {
+    padding: 1.25rem !important;
+}
+
+#changelist-filter h2 {
+    font-size: 0.9rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+    color: #334155 !important;
+    margin-bottom: 0.75rem !important;
+}
+
+#changelist-filter h3 {
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    color: #475569 !important;
+    margin-top: 1rem !important;
+}
+
+#changelist-filter ul {
+    padding-left: 0 !important;
+    list-style: none !important;
+}
+
+#changelist-filter li.selected a {
+    font-weight: 700 !important;
+    color: var(--primary-color) !important;
+}
+
+/* Formulários e Inputs */
+input[type=text], input[type=password], input[type=email], input[type=number], input[type=url], input[type=date], select, textarea {
+    background: rgba(255, 255, 255, 0.85) !important;
+    border: 1px solid var(--glass-border-subtle) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 0.55rem 0.85rem !important;
+    font-size: 0.9rem !important;
+    color: #1e293b !important;
+    transition: all 0.2s ease !important;
+}
+
+input[type=text]:focus, input[type=password]:focus, input[type=email]:focus, select:focus, textarea:focus {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15) !important;
+    outline: none !important;
+}
+
+.form-row {
+    padding: 0.9rem 1.25rem !important;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.4) !important;
+}
+
+.form-row label {
+    font-weight: 600 !important;
+    color: #334155 !important;
+    font-size: 0.875rem !important;
+}
+
+/* Botões do Admin (Material Design) */
+.button, input[type=submit], input[type=button], .submit-row input, a.addlink, a.changelink {
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    padding: 0.55rem 1.1rem !important;
+    border-radius: var(--radius-md) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border: none !important;
+    cursor: pointer !important;
+}
+
+.button.default, input[type=submit].default, .submit-row input.default {
+    background: linear-gradient(135deg, var(--primary-color), #6366f1) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35) !important;
+}
+
+.button.default:hover, input[type=submit].default:hover {
+    background: linear-gradient(135deg, #4338ca, var(--primary-color)) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45) !important;
+}
+
+.deletelink {
+    background: linear-gradient(135deg, #ef4444, #f43f5e) !important;
+    color: #ffffff !important;
+    border-radius: var(--radius-md) !important;
+    padding: 0.55rem 1.1rem !important;
+    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35) !important;
+    text-decoration: none !important;
+}
+
+.deletelink:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.45) !important;
+}
+
+.submit-row {
+    background: var(--glass-bg) !important;
+    backdrop-filter: var(--glass-blur) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--glass-shadow) !important;
+    padding: 1rem 1.25rem !important;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Paginação */
+.paginator {
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+    padding: 1rem !important;
+    color: #64748b !important;
+}
+
+.paginator a {
+    background: rgba(255, 255, 255, 0.8) !important;
+    padding: 0.4rem 0.75rem !important;
+    border-radius: var(--radius-sm) !important;
+    color: var(--primary-color) !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+    margin: 0 0.2rem !important;
+}
+
+.paginator a:hover {
+    background: var(--primary-color) !important;
+    color: #ffffff !important;
+}
+
+/* Responsividade Mobile */
+@media (max-width: 767.98px) {
+    #container {
+        flex-direction: column !important;
+    }
+    #header {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+    #changelist {
+        flex-direction: column !important;
+    }
+    #changelist-filter {
+        width: 100% !important;
+        margin-top: 1rem !important;
+    }
+}
