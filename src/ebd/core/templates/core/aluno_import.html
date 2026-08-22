@@ -1,66 +1,77 @@
 {% extends 'base.html' %}
-{% block title %}Importar Planilha de Alunos — EBD{% endblock %}
+{% block title %}Importar Alunos — EBD Gestão{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
-        <div class="card shadow-sm">
-            <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-file-earmark-excel me-2 text-success"></i>Importar Alunos via Planilha</span>
+<div class="row justify-content-center py-3">
+    <div class="col-md-9 col-lg-7">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-transparent fw-bold fs-5 py-3 d-flex align-items-center gap-2">
+                <i class="bi bi-file-earmark-excel-fill text-success fs-4"></i>
+                Importar Alunos via Planilha (.xlsx / .csv)
             </div>
-            <div class="card-body">
-                <p class="text-muted small">
-                    Envie um arquivo no formato <strong>.xlsx</strong> (Excel) ou <strong>.csv</strong> contendo o formulário de respostas de matrículas.
-                    O sistema irá criar automaticamente as turmas e cadastrar/atualizar os alunos.
-                </p>
+            <div class="card-body p-4">
+                <div class="alert alert-info d-flex align-items-start gap-2 mb-4 border-0">
+                    <i class="bi bi-info-circle-fill text-info fs-5 flex-shrink-0 mt-1"></i>
+                    <div class="small">
+                        Envie uma planilha exportada do Google Forms ou Excel contendo as respostas de matrícula. O sistema criará as turmas e atualizará os cadastros dos alunos automaticamente.
+                    </div>
+                </div>
 
                 <form method="post" enctype="multipart/form-data">
                     {% csrf_token %}
-                    <div class="mb-4">
-                        <label for="arquivo" class="form-label fw-medium">Selecione o arquivo (.xlsx ou .csv):</label>
+                    <div class="mb-4 p-4 border border-2 border-dashed rounded-3 text-center bg-light bg-opacity-50">
+                        <i class="bi bi-cloud-arrow-up text-primary d-block mb-2" style="font-size: 3rem;"></i>
+                        <label for="arquivo" class="form-label fw-bold mb-2">Selecione o arquivo da planilha:</label>
                         <input type="file" name="arquivo" id="arquivo" class="form-control" accept=".xlsx, .csv" required>
-                        <div class="form-text">
-                            Suporta planilhas exportadas do Google Forms / Excel (ex.: <em>Respostas ao formulário 1</em>).
+                        <div class="form-text mt-2 small text-muted">
+                            Formatos suportados: <strong>.xlsx</strong> (Excel) ou <strong>.csv</strong>
                         </div>
                     </div>
 
-                    <div class="d-flex flex-wrap justify-content-between gap-2">
-                        <a href="{% url 'core:aluno_list' %}" class="btn btn-outline-secondary">Cancelar</a>
-                        <button type="submit" class="btn btn-success">
-                            Importar Planilha
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <a href="{% url 'core:aluno_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-1"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-success px-4">
+                            <i class="bi bi-upload me-1"></i> Processar Importação
                         </button>
                     </div>
                 </form>
 
                 {% if erros %}
-                <div class="mt-4">
-                    <div class="alert alert-warning mb-3">
-                        <strong>Importação concluída com avisos.</strong>
-                        Novos alunos: <span class="fw-semibold">{{ criados }}</span> ·
-                        Atualizados: <span class="fw-semibold">{{ atualizados }}</span> ·
-                        Linhas com problema: <span class="fw-semibold">{{ erros|length }}</span>
+                <div class="mt-4 pt-3 border-top">
+                    <div class="alert alert-warning mb-3 d-flex align-items-center gap-2">
+                        <i class="bi bi-exclamation-triangle-fill text-warning fs-4"></i>
+                        <div>
+                            <strong>Importação concluída com avisos:</strong><br>
+                            Novos alunos: <span class="fw-bold text-success">{{ criados }}</span> ·
+                            Atualizados: <span class="fw-bold text-info">{{ atualizados }}</span> ·
+                            Linhas com problema: <span class="fw-bold text-danger">{{ erros|length }}</span>
+                        </div>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-sm table-striped align-middle">
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm table-hover align-middle">
                             <thead>
                                 <tr>
                                     <th scope="col">Linha</th>
                                     <th scope="col">Valor</th>
-                                    <th scope="col">Problema</th>
+                                    <th scope="col">Inconsistência Detectada</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for e in erros %}
                                 <tr>
-                                    <td class="text-nowrap">{{ e.linha }}</td>
-                                    <td>{{ e.valor }}</td>
-                                    <td>{{ e.erro }}</td>
+                                    <td class="text-nowrap fw-bold">{{ e.linha }}</td>
+                                    <td><code>{{ e.valor }}</code></td>
+                                    <td class="text-danger small">{{ e.erro }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
-                    <a href="{% url 'core:aluno_list' %}" class="btn btn-primary">Ver lista de alunos</a>
+                    <a href="{% url 'core:aluno_list' %}" class="btn btn-primary w-100">
+                        <i class="bi bi-people me-1"></i> Ver Lista Atualizada de Alunos
+                    </a>
                 </div>
                 {% endif %}
             </div>

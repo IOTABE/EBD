@@ -1,18 +1,33 @@
 {% extends 'base.html' %}
-{% block title %}EBD — Gestão{% endblock %}
+{% block title %}Confirmar Exclusão — EBD Gestão{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow-sm border-danger">
-            <div class="card-header bg-danger text-white fw-semibold">Confirmar exclusão</div>
-            <div class="card-body">
-                <p>Deseja realmente excluir <strong>{% block objeto_nome %}{{ object }}{% endblock %}</strong>?</p>
-                <form method="post">
+<div class="row justify-content-center py-4">
+    <div class="col-md-6 col-lg-5">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-danger text-white fw-bold py-3 d-flex align-items-center gap-2" style="border-top-left-radius: var(--radius-lg); border-top-right-radius: var(--radius-lg);">
+                <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                Confirmar Exclusão
+            </div>
+            <div class="card-body p-4 text-center">
+                <div class="my-3">
+                    <i class="bi bi-trash3 text-danger d-block mb-3" style="font-size: 3rem;"></i>
+                    <p class="fs-5 text-dark mb-1">Deseja realmente excluir?</p>
+                    <div class="fw-bold text-danger bg-danger-subtle px-3 py-2 rounded-3 d-inline-block">
+                        {% block objeto_nome %}{{ object }}{% endblock %}
+                    </div>
+                    <p class="text-muted small mt-3">Esta ação é irreversível e removerá permanentemente este registro.</p>
+                </div>
+                
+                <form method="post" class="mt-4">
                     {% csrf_token %}
-                    <div class="d-flex flex-wrap justify-content-between gap-2">
-                        <a href="{% block voltar_url %}#{% endblock %}" class="btn btn-outline-secondary">Cancelar</a>
-                        <button type="submit" class="btn btn-danger">Sim, excluir</button>
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a href="{% block voltar_url %}#{% endblock %}" class="btn btn-outline-secondary px-4">
+                            <i class="bi bi-arrow-left me-1"></i> Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger px-4">
+                            <i class="bi bi-trash me-1"></i> Sim, Excluir Registro
+                        </button>
                     </div>
                 </form>
             </div>

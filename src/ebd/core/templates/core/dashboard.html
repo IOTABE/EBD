@@ -1,44 +1,73 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Dashboard — EBD{% endblock %}
+{% block title %}Dashboard — EBD Gestão{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">Dashboard da EBD</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Dashboard da EBD</h2>
+        <p class="text-muted mb-0 small">Acompanhamento geral de presenças, frequência e turmas ativas</p>
+    </div>
+</div>
 
-<div class="row g-3 mb-4 text-center">
-    <div class="col-6 col-md-3">
-        <div class="card text-bg-primary"><div class="card-body">
-            <h3>{{ total_presencas }}</h3><div>Presenças totais</div>
-        </div></div>
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="card card-hover stat-card stat-primary">
+            <div class="stat-icon"><i class="bi bi-check2-circle"></i></div>
+            <div>
+                <div class="stat-value">{{ total_presencas }}</div>
+                <div class="stat-label">Presenças totais</div>
+            </div>
+        </div>
     </div>
-    <div class="col-6 col-md-3">
-        <div class="card text-bg-danger"><div class="card-body">
-            <h3>{{ total_ausencias }}</h3><div>Ausências totais</div>
-        </div></div>
+    <div class="col-6 col-lg-3">
+        <div class="card card-hover stat-card stat-danger">
+            <div class="stat-icon"><i class="bi bi-x-circle"></i></div>
+            <div>
+                <div class="stat-value">{{ total_ausencias }}</div>
+                <div class="stat-label">Ausências totais</div>
+            </div>
+        </div>
     </div>
-    <div class="col-6 col-md-3">
-        <div class="card text-bg-success"><div class="card-body">
-            <h3>{{ total_classes }}</h3><div>Classes</div>
-        </div></div>
+    <div class="col-6 col-lg-3">
+        <div class="card card-hover stat-card stat-success">
+            <div class="stat-icon"><i class="bi bi-door-open"></i></div>
+            <div>
+                <div class="stat-value">{{ total_classes }}</div>
+                <div class="stat-label">Classes ativas</div>
+            </div>
+        </div>
     </div>
-    <div class="col-6 col-md-3">
-        <div class="card text-bg-info"><div class="card-body">
-            <h3>{{ total_alunos_ativos }}</h3><div>Alunos ativos</div>
-        </div></div>
+    <div class="col-6 col-lg-3">
+        <div class="card card-hover stat-card stat-info">
+            <div class="stat-icon"><i class="bi bi-person-check"></i></div>
+            <div>
+                <div class="stat-value">{{ total_alunos_ativos }}</div>
+                <div class="stat-label">Alunos ativos</div>
+            </div>
+        </div>
     </div>
 </div>
 
 <div class="row g-4">
     <div class="col-lg-7">
-        <div class="card shadow-sm">
-            <div class="card-header bg-white fw-semibold">Evolução da frequência mensal</div>
-            <div class="card-body"><canvas id="graficoEvolucao" height="120"></canvas></div>
+        <div class="card border-0">
+            <div class="card-header bg-transparent fw-bold d-flex align-items-center gap-2">
+                <i class="bi bi-graph-up-arrow text-primary"></i> Evolução da Frequência Mensal
+            </div>
+            <div class="card-body">
+                <canvas id="graficoEvolucao" height="130"></canvas>
+            </div>
         </div>
     </div>
     <div class="col-lg-5">
-        <div class="card shadow-sm">
-            <div class="card-header bg-white fw-semibold">Assiduidade por classe (%)</div>
-            <div class="card-body"><canvas id="graficoAssiduidade" height="120"></canvas></div>
+        <div class="card border-0">
+            <div class="card-header bg-transparent fw-bold d-flex align-items-center gap-2">
+                <i class="bi bi-bar-chart-fill text-info"></i> Assiduidade por Classe (%)
+            </div>
+            <div class="card-body">
+                <canvas id="graficoAssiduidade" height="130"></canvas>
+            </div>
         </div>
     </div>
 </div>
@@ -47,6 +76,9 @@
 {% block scripts %}
 <script src="{% static 'vendor/chart.js/chart.umd.min.js' %}"></script>
 <script>
+    Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+    Chart.defaults.color = "#64748b";
+
     const meses = {{ meses|safe }};
     const presentes = {{ presentes_mes|safe }};
     const ausentes = {{ ausentes_mes|safe }};
@@ -56,23 +88,66 @@
         data: {
             labels: meses,
             datasets: [
-                { label: 'Presentes', data: presentes, borderColor: '#198754', backgroundColor: 'rgba(25,135,84,.15)', tension: .3, fill: true },
-                { label: 'Ausentes', data: ausentes, borderColor: '#dc3545', backgroundColor: 'rgba(220,53,69,.12)', tension: .3, fill: true }
+                {
+                    label: 'Presentes',
+                    data: presentes,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#10b981',
+                    pointRadius: 4
+                },
+                {
+                    label: 'Ausentes',
+                    data: ausentes,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+                    tension: 0.4,
+                    fill: true,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#ef4444',
+                    pointRadius: 4
+                }
             ]
         },
-        options: { responsive: true, plugins: { legend: { position: 'top' } } }
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 8, font: { weight: '600' } } }
+            },
+            scales: {
+                x: { grid: { display: false } },
+                y: { grid: { color: 'rgba(226, 232, 240, 0.6)' } }
+            }
+        }
     });
 
     new Chart(document.getElementById('graficoAssiduidade'), {
         type: 'bar',
         data: {
             labels: {{ classes_nomes|safe }},
-            datasets: [{ label: '% de presença', data: {{ percentuais|safe }}, backgroundColor: '#0d6efd' }]
+            datasets: [{
+                label: '% de presença',
+                data: {{ percentuais|safe }},
+                backgroundColor: 'rgba(79, 70, 229, 0.85)',
+                hoverBackgroundColor: '#4f46e5',
+                borderRadius: 8,
+                borderSkipped: false
+            }]
         },
         options: {
             indexAxis: 'y',
-            scales: { x: { min: 0, max: 100, ticks: { callback: v => v + '%' } } },
-            plugins: { tooltip: { callbacks: { label: ctx => ctx.parsed.x + '%' } } }
+            responsive: true,
+            scales: {
+                x: { min: 0, max: 100, ticks: { callback: v => v + '%' }, grid: { color: 'rgba(226, 232, 240, 0.6)' } },
+                y: { grid: { display: false } }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: ctx => 'Assiduidade: ' + ctx.parsed.x + '%' } }
+            }
         }
     });
 </script>

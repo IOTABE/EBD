@@ -1,77 +1,86 @@
 {% extends 'base.html' %}
-{% block title %}Relatório Mensal — EBD{% endblock %}
+{% block title %}Relatório Mensal — EBD Gestão{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-    <h2 class="mb-0">Relatório Mensal</h2>
-    <a href="{% url 'core:dashboard' %}" class="btn btn-outline-secondary">Voltar</a>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-calendar3 text-primary me-2"></i>Relatório Mensal</h2>
+        <p class="text-muted mb-0 small">Acompanhamento da assiduidade aos domingos do mês</p>
+    </div>
+    <a href="{% url 'core:dashboard' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Voltar ao Dashboard
+    </a>
 </div>
 
-<form method="get" class="row g-2 align-items-end mb-4">
-    <div class="col-auto">
-        <label for="mes" class="form-label">Mês</label>
-        <select id="mes" name="mes" class="form-select">
-            {% for numero, nome in meses %}
-                <option value="{{ numero }}" {% if numero == mes %}selected{% endif %}>{{ nome }}</option>
-            {% endfor %}
-        </select>
-    </div>
-    <div class="col-auto">
-        <label for="ano" class="form-label">Ano</label>
-        <input type="number" id="ano" name="ano" value="{{ ano }}" class="form-control" style="width: 100px;">
-    </div>
-    <div class="col-auto">
-        <button type="submit" class="btn btn-primary">Filtrar</button>
-    </div>
-</form>
+<div class="card p-3 mb-4 border-0">
+    <form method="get" class="row g-2 align-items-center">
+        <div class="col-md-4">
+            <select id="mes" name="mes" class="form-select">
+                {% for numero, nome in meses %}
+                    <option value="{{ numero }}" {% if numero == mes %}selected{% endif %}>{{ nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <input type="number" id="ano" name="ano" value="{{ ano }}" class="form-control" placeholder="Ano">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-filter me-1"></i> Filtrar</button>
+        </div>
+    </form>
+</div>
 
-<div class="card shadow-sm">
-    <div class="card-header bg-white fw-semibold">
-        Presença nos domingos de {{ nome_mes }}/{{ ano }} — totais por classe
+<div class="card border-0 mb-4">
+    <div class="card-header bg-transparent fw-bold d-flex align-items-center gap-2 py-3">
+        <i class="bi bi-table text-primary"></i>
+        Presença nos domingos de {{ nome_mes }}/{{ ano }} — Totais por Classe
     </div>
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
+            <thead>
                 <tr>
                     <th>Classe</th>
                     <th class="text-center">Matriculados</th>
                     {% for domingo in domingos %}
-                        <th class="text-center">{{ domingo|date:'d/m' }}</th>
+                        <th class="text-center"><i class="bi bi-calendar-check text-muted me-1"></i>{{ domingo|date:'d/m' }}</th>
                     {% endfor %}
-                    <th class="text-center">Total da classe</th>
+                    <th class="text-center">Total da Classe</th>
                 </tr>
             </thead>
             <tbody>
                 {% for linha in linhas_por_classe %}
                 <tr>
-                    <td>{{ linha.nome }}</td>
-                    <td class="text-center">{{ linha.matriculados }}</td>
+                    <td class="fw-semibold text-dark">{{ linha.nome }}</td>
+                    <td class="text-center"><span class="badge text-bg-secondary">{{ linha.matriculados }}</span></td>
                     {% for valor in linha.valores %}
-                        <td class="text-center">{{ valor }}</td>
+                        <td class="text-center fw-semibold text-success">{{ valor }}</td>
                     {% endfor %}
-                    <td class="text-center fw-semibold">{{ linha.total }}</td>
+                    <td class="text-center fw-bold text-dark fs-6">{{ linha.total }}</td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="{{ domingos|length|add:3 }}" class="text-center text-muted py-4">
-                    Nenhum domingo neste mês (ou sem aulas).
-                </td></tr>
+                <tr>
+                    <td colspan="{{ domingos|length|add:3 }}" class="text-center text-muted py-5">
+                        <i class="bi bi-inbox fs-1 d-block text-secondary mb-2"></i>
+                        Nenhum domingo com aulas registradas neste mês.
+                    </td>
+                </tr>
                 {% endfor %}
             </tbody>
             {% if linhas_por_classe %}
-            <tfoot class="table-light fw-semibold">
-                <tr>
-                    <td>Total do dia</td>
-                    <td class="text-center">{{ total_matriculados }}</td>
+            <tfoot class="table-light fw-bold">
+                <tr class="table-active">
+                    <td>Total do Dia</td>
+                    <td class="text-center"><span class="badge text-bg-dark fs-6">{{ total_matriculados }}</span></td>
                     {% for total in totais_por_domingo_lista %}
-                        <td class="text-center">{{ total }}</td>
+                        <td class="text-center text-success fs-6">{{ total }}</td>
                     {% endfor %}
-                    <td class="text-center">{{ total_geral }}</td>
+                    <td class="text-center fs-6 text-dark">{{ total_geral }}</td>
                 </tr>
                 <tr>
-                    <td>% Presentes / Matriculados</td>
+                    <td>% Presença Relativa</td>
                     <td></td>
                     {% for percentual in percentuais_por_domingo %}
-                        <td class="text-center">{{ percentual }}%</td>
+                        <td class="text-center text-primary fs-6">{{ percentual }}%</td>
                     {% endfor %}
                     <td></td>
                 </tr>

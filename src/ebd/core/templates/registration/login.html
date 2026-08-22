@@ -3,15 +3,22 @@
 {% block title %}Entrar — EBD Gestão{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-5 col-lg-4">
-        <div class="card shadow-sm">
-            <div class="card-body p-4">
-                <h3 class="card-title text-center mb-4">Acesso restrito</h3>
+<div class="row justify-content-center py-4">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-lg border-0">
+            <div class="card-body p-4 p-sm-5">
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-primary text-white rounded-circle mb-3" style="width: 60px; height: 60px; font-size: 1.8rem; background: linear-gradient(135deg, var(--primary-color), #818cf8) !important;">
+                        <i class="bi bi-person-lock"></i>
+                    </div>
+                    <h3 class="fw-bold mb-1">Acesso Restrito</h3>
+                    <p class="text-muted small">Informe suas credenciais para continuar</p>
+                </div>
 
                 {% if form.errors %}
-                    <div class="alert alert-danger" role="alert">
-                        Usuário ou senha inválidos. Tente novamente.
+                    <div class="alert alert-danger d-flex align-items-center gap-2 mb-4" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill text-danger fs-5"></i>
+                        <div class="small">Usuário ou senha inválidos. Tente novamente.</div>
                     </div>
                 {% endif %}
 
@@ -20,14 +27,22 @@
 
                     <div class="mb-3">
                         <label for="{{ form.username.id_for_label }}" class="form-label">Usuário</label>
-                        {{ form.username }}
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-person"></i></span>
+                            {{ form.username }}
+                        </div>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label for="{{ form.password.id_for_label }}" class="form-label">Senha</label>
-                        {{ form.password }}
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-key"></i></span>
+                            {{ form.password }}
+                        </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary w-100">Entrar</button>
+                    <button type="submit" class="btn btn-primary w-100 py-2">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Entrar no Sistema
+                    </button>
                     <input type="hidden" name="next" value="{{ next }}">
                 </form>
             </div>

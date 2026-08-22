@@ -1,43 +1,60 @@
 {% extends 'base.html' %}
-{% block title %}Alunos — EBD{% endblock %}
+{% block title %}Alunos — EBD Gestão{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-    <h2 class="mb-0">Alunos</h2>
-    <div class="btn-group" role="group">
-        <a href="{% url 'core:aluno_create' %}" class="btn btn-primary">+ Novo aluno</a>
-        <a href="{% url 'core:aluno_import' %}" class="btn btn-success">Importar planilha</a>
-        <a href="{% url 'core:aluno_export' %}" class="btn btn-outline-secondary">Exportar CSV</a>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-people text-primary me-2"></i>Alunos</h2>
+        <p class="text-muted mb-0 small">Gerenciamento de estudantes matriculados na EBD</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'core:aluno_create' %}" class="btn btn-primary">
+            <i class="bi bi-person-plus me-1"></i> Matricular Aluno
+        </a>
+        <a href="{% url 'core:aluno_import' %}" class="btn btn-success">
+            <i class="bi bi-file-earmark-excel me-1"></i> Importar Planilha
+        </a>
+        <a href="{% url 'core:aluno_export' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-download me-1"></i> Exportar CSV
+        </a>
     </div>
 </div>
 
-<form method="get" class="row g-2 mb-3">
-    <div class="col-md-6">
-        <input type="text" name="q" value="{{ q }}" class="form-control"
-               placeholder="Buscar aluno por nome...">
-    </div>
-    <div class="col-md-3">
-        <select name="classe" class="form-select">
-            <option value="">Todas as classes</option>
-            {% for classe in lista_classes %}
-                <option value="{{ classe.pk }}" {% if classe_atual == classe.pk|stringformat:'s' %}selected{% endif %}>
-                    {{ classe.nome }}
-                </option>
-            {% endfor %}
-        </select>
-    </div>
-    <div class="col-auto">
-        <button type="submit" class="btn btn-primary">Filtrar</button>
-        {% if q or classe_atual %}
-            <a href="{% url 'core:aluno_list' %}" class="btn btn-outline-secondary">Limpar</a>
-        {% endif %}
-    </div>
-</form>
+<div class="card p-3 mb-4 border-0">
+    <form method="get" class="row g-2 align-items-center">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                <input type="text" name="q" value="{{ q }}" class="form-control border-start-0" placeholder="Buscar aluno por nome...">
+            </div>
+        </div>
+        <div class="col-md-4">
+            <select name="classe" class="form-select">
+                <option value="">Todas as classes</option>
+                {% for classe in lista_classes %}
+                    <option value="{{ classe.pk }}" {% if classe_atual == classe.pk|stringformat:'s' %}selected{% endif %}>
+                        {{ classe.nome }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-1">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-filter"></i> Filtrar
+            </button>
+            {% if q or classe_atual %}
+                <a href="{% url 'core:aluno_list' %}" class="btn btn-outline-secondary" title="Limpar filtros">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
 
-<div class="card shadow-sm">
+<div class="card border-0">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
+            <thead>
                 <tr>
                     <th>Nome</th>
                     <th>Classe</th>
@@ -50,24 +67,35 @@
             <tbody>
                 {% for aluno in alunos %}
                 <tr>
-                    <td>{{ aluno.nome }}</td>
-                    <td>{{ aluno.classe|default:'—' }}</td>
+                    <td class="fw-semibold text-dark">{{ aluno.nome }}</td>
+                    <td><span class="badge text-bg-info"><i class="bi bi-door-open me-1"></i>{{ aluno.classe|default:'Sem classe' }}</span></td>
                     <td>{{ aluno.telefone|default:'—' }}</td>
                     <td>{{ aluno.data_nascimento|date:'d/m/Y'|default:'—' }}</td>
                     <td>
                         {% if aluno.status == 'ativo' %}
-                            <span class="badge text-bg-success">Ativo</span>
+                            <span class="badge text-bg-success"><i class="bi bi-check-circle me-1"></i>Ativo</span>
                         {% else %}
-                            <span class="badge text-bg-secondary">Inativo</span>
+                            <span class="badge text-bg-secondary"><i class="bi bi-dash-circle me-1"></i>Inativo</span>
                         {% endif %}
                     </td>
                     <td class="text-end">
-                        <a href="{% url 'core:aluno_update' aluno.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
-                        <a href="{% url 'core:aluno_delete' aluno.pk %}" class="btn btn-sm btn-outline-danger">Excluir</a>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'core:aluno_update' aluno.pk %}" class="btn btn-sm btn-outline-primary" title="Editar">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a href="{% url 'core:aluno_delete' aluno.pk %}" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="6" class="text-center text-muted py-4">Nenhum aluno encontrado.</td></tr>
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-5">
+                        <i class="bi bi-inbox fs-1 d-block text-secondary mb-2"></i>
+                        Nenhum aluno encontrado com os filtros selecionados.
+                    </td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>

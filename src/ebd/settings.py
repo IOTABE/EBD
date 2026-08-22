@@ -36,7 +36,7 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 # Domínios canônicos do site. Fonte única para ALLOWED_HOSTS e
 # CSRF_TRUSTED_ORIGINS — garante que "www" nunca seja esquecido em produção.
-DOMINIOS = ['ibnj.top', 'www.ibnj.top']
+DOMINIOS = ['ibnj.top', 'www.ibnj.top', "10.0.0.62"]
 
 ALLOWED_HOSTS = config(
     'ALLOWED_HOSTS',

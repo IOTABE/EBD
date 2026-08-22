@@ -1,29 +1,40 @@
 {% extends 'base.html' %}
-{% block title %}Professores — EBD{% endblock %}
+{% block title %}Professores — EBD Gestão{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-    <h2 class="mb-0">Professores</h2>
-    <a href="{% url 'core:professor_create' %}" class="btn btn-primary">+ Novo professor</a>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-person-badge text-primary me-2"></i>Professores</h2>
+        <p class="text-muted mb-0 small">Docentes cadastrados para lecionar nas classes</p>
+    </div>
+    <div>
+        <a href="{% url 'core:professor_create' %}" class="btn btn-primary">
+            <i class="bi bi-person-plus me-1"></i> Cadastrar Professor
+        </a>
+    </div>
 </div>
 
-<form method="get" class="row g-2 mb-3">
-    <div class="col-12 col-sm">
-        <input type="text" name="q" value="{{ q }}" class="form-control"
-               placeholder="Buscar professor por nome ou e-mail...">
-    </div>
-    <div class="col-12 col-sm-auto">
-        <button type="submit" class="btn btn-primary">Buscar</button>
-        {% if q %}
-            <a href="{% url 'core:professor_list' %}" class="btn btn-outline-secondary">Limpar</a>
-        {% endif %}
-    </div>
-</form>
+<div class="card p-3 mb-4 border-0">
+    <form method="get" class="row g-2 align-items-center">
+        <div class="col-md-9">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                <input type="text" name="q" value="{{ q }}" class="form-control border-start-0" placeholder="Buscar professor por nome ou e-mail...">
+            </div>
+        </div>
+        <div class="col-md-3 d-flex gap-1">
+            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> Buscar</button>
+            {% if q %}
+                <a href="{% url 'core:professor_list' %}" class="btn btn-outline-secondary" title="Limpar"><i class="bi bi-x-lg"></i></a>
+            {% endif %}
+        </div>
+    </form>
+</div>
 
-<div class="card shadow-sm">
+<div class="card border-0">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
+            <thead>
                 <tr>
                     <th>Nome</th>
                     <th>E-mail</th>
@@ -35,17 +46,28 @@
             <tbody>
                 {% for professor in professores %}
                 <tr>
-                    <td>{{ professor.nome }}</td>
+                    <td class="fw-semibold text-dark">{{ professor.nome }}</td>
                     <td>{{ professor.email|default:'—' }}</td>
                     <td>{{ professor.telefone|default:'—' }}</td>
                     <td>{{ professor.data_nascimento|date:'d/m/Y'|default:'—' }}</td>
                     <td class="text-end">
-                        <a href="{% url 'core:professor_update' professor.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
-                        <a href="{% url 'core:professor_delete' professor.pk %}" class="btn btn-sm btn-outline-danger">Excluir</a>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'core:professor_update' professor.pk %}" class="btn btn-sm btn-outline-primary" title="Editar">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a href="{% url 'core:professor_delete' professor.pk %}" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="5" class="text-center text-muted py-4">Nenhum professor encontrado.</td></tr>
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-5">
+                        <i class="bi bi-inbox fs-1 d-block text-secondary mb-2"></i>
+                        Nenhum professor encontrado.
+                    </td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>

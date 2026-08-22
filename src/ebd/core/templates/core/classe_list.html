@@ -1,44 +1,64 @@
 {% extends 'base.html' %}
-{% block title %}Classes — EBD{% endblock %}
+{% block title %}Classes — EBD Gestão{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-    <h2 class="mb-0">Classes</h2>
-    <a href="{% url 'core:classe_create' %}" class="btn btn-primary">+ Nova classe</a>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-door-open text-primary me-2"></i>Classes</h2>
+        <p class="text-muted mb-0 small">Turmas e faixas etárias ativas na Escola Dominical</p>
+    </div>
+    <div>
+        <a href="{% url 'core:classe_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> Nova Classe
+        </a>
+    </div>
 </div>
 
-<div class="card shadow-sm">
+<div class="card border-0">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
+            <thead>
                 <tr>
-                    <th>Nome</th>
-                    <th>Faixa etária</th>
-                    <th>Professores</th>
-                    <th>Alunos ativos</th>
+                    <th>Nome da Classe</th>
+                    <th>Faixa Etária</th>
+                    <th>Professores Responsáveis</th>
+                    <th class="text-center">Alunos Ativos</th>
                     <th class="text-end">Ações</th>
                 </tr>
             </thead>
             <tbody>
                 {% for classe in classes %}
                 <tr>
-                    <td>{{ classe.nome }}</td>
-                    <td>{{ classe.faixa_etaria }}</td>
+                    <td class="fw-semibold text-dark">{{ classe.nome }}</td>
+                    <td><span class="badge text-bg-secondary">{{ classe.faixa_etaria }}</span></td>
                     <td>
                         {% if classe.professores.all %}
-                            {{ classe.professores.all|join:', ' }}
+                            <i class="bi bi-person-badge text-muted me-1"></i>{{ classe.professores.all|join:', ' }}
                         {% else %}
-                            —
+                            <span class="text-muted">—</span>
                         {% endif %}
                     </td>
-                    <td>{{ classe.total_alunos }}</td>
+                    <td class="text-center">
+                        <span class="badge text-bg-success rounded-pill px-3">{{ classe.total_alunos }} aluno(s)</span>
+                    </td>
                     <td class="text-end">
-                        <a href="{% url 'core:classe_update' classe.pk %}" class="btn btn-sm btn-outline-primary">Editar</a>
-                        <a href="{% url 'core:classe_delete' classe.pk %}" class="btn btn-sm btn-outline-danger">Excluir</a>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'core:classe_update' classe.pk %}" class="btn btn-sm btn-outline-primary" title="Editar">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a href="{% url 'core:classe_delete' classe.pk %}" class="btn btn-sm btn-outline-danger" title="Excluir">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="5" class="text-center text-muted py-4">Nenhuma classe cadastrada.</td></tr>
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-5">
+                        <i class="bi bi-inbox fs-1 d-block text-secondary mb-2"></i>
+                        Nenhuma classe cadastrada.
+                    </td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>

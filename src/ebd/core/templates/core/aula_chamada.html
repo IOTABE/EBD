@@ -1,43 +1,57 @@
 {% extends 'base.html' %}
-{% block title %}Chamada — EBD{% endblock %}
+{% block title %}Chamada Dominical — EBD Gestão{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-    <h2 class="mb-0">Chamada — {{ aula.data|date:'d/m/Y' }}</h2>
-    <a href="{% url 'core:aula_list' %}" class="btn btn-outline-secondary">Voltar</a>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-card-checklist text-primary me-2"></i>Chamada Dominical</h2>
+        <div class="d-flex align-items-center gap-2 mt-1">
+            <span class="badge text-bg-primary fs-6"><i class="bi bi-calendar3 me-1"></i>{{ aula.data|date:'d/m/Y' }}</span>
+            <span class="badge text-bg-info fs-6"><i class="bi bi-door-open me-1"></i>{{ aula.classe }}</span>
+        </div>
+    </div>
+    <a href="{% url 'core:aula_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Voltar para Aulas
+    </a>
 </div>
 
-<div class="alert alert-info">
-    <strong>{{ aula.classe }}</strong> — {{ aula.licao|default:'Sem lição informada' }}<br>
-    <small>Regra: todos os alunos ativos aparecem marcados como <strong>presentes</strong>; desmarque apenas os ausentes.</small>
+<div class="alert alert-info d-flex align-items-start gap-3 mb-4 border-0 shadow-sm">
+    <i class="bi bi-info-circle-fill text-info fs-4 flex-shrink-0 mt-1"></i>
+    <div>
+        <div class="fw-bold fs-6">Lição: {{ aula.licao|default:'Sem lição informada' }}</div>
+        <small class="text-secondary">Por padrão, todos os alunos aparecem marcados como <strong>presentes</strong>. Desmarque apenas aqueles que faltaram nesta aula.</small>
+    </div>
 </div>
 
 <form method="post">
     {% csrf_token %}
     {{ formset.management_form }}
-    <div class="card shadow-sm">
+    <div class="card border-0 mb-4">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0" id="tabela-chamada">
-                <thead class="table-light">
+                <thead>
                     <tr>
-                        <th style="width: 40px;"></th>
-                        <th>Aluno</th>
-                        <th style="width: 120px;">Presente</th>
+                        <th style="width: 60px;" class="text-center">#</th>
+                        <th>Nome do Aluno</th>
+                        <th style="width: 140px;" class="text-center">Presença</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for form in formset %}
                         <tr class="linha-presenca">
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ form.instance.aluno.nome }}</td>
+                            <td class="text-center text-muted fw-semibold">{{ forloop.counter }}</td>
+                            <td class="fw-semibold text-dark fs-6">{{ form.instance.aluno.nome }}</td>
                             <td class="text-center">
                                 {{ form.id }}
-                                {{ form.presente }}
+                                <div class="form-check form-switch d-inline-block">
+                                    {{ form.presente }}
+                                </div>
                             </td>
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="3" class="text-center text-muted py-4">
+                            <td colspan="3" class="text-center text-muted py-5">
+                                <i class="bi bi-person-x fs-1 d-block text-secondary mb-2"></i>
                                 Nenhum aluno ativo nesta classe.
                             </td>
                         </tr>
@@ -45,12 +59,18 @@
                 </tbody>
             </table>
         </div>
-        <div class="card-footer bg-white d-flex flex-wrap justify-content-between align-items-center gap-2">
-            <div class="btn-group" role="group" aria-label="Marcar presença">
-                <button type="button" class="btn btn-sm btn-outline-success" onclick="marcarTodos(true)">Todos presentes</button>
-                <button type="button" class="btn btn-sm btn-outline-danger" onclick="marcarTodos(false)">Desmarcar todos</button>
+        <div class="card-footer bg-transparent d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="btn-group" role="group" aria-label="Marcar presença em lote">
+                <button type="button" class="btn btn-sm btn-outline-success" onclick="marcarTodos(true)">
+                    <i class="bi bi-check-all me-1"></i> Marcar Todos Presentes
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="marcarTodos(false)">
+                    <i class="bi bi-x-lg me-1"></i> Desmarcar Todos
+                </button>
             </div>
-            <button type="submit" class="btn btn-primary">Salvar chamada</button>
+            <button type="submit" class="btn btn-primary px-4 py-2">
+                <i class="bi bi-save me-1"></i> Salvar Chamada
+            </button>
         </div>
     </div>
 </form>
@@ -66,6 +86,9 @@
     }
 
     document.querySelectorAll('#tabela-chamada input[type="checkbox"]').forEach(function (cb) {
+        cb.classList.add('form-check-input');
+        cb.style.cursor = 'pointer';
+        cb.style.transform = 'scale(1.25)';
         cb.addEventListener('change', function () { atualizarLinha(cb); });
         atualizarLinha(cb);
     });
